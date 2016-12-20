@@ -24,8 +24,7 @@ class GitVersionTest extends Specification {
   def "Produces version from branch or tag name"() {
 
     expect:
-      GitVersion.determineVersion(new File("$repoFolder/$repo")) == expectedVersion
-      println GitVersion.determineVersion(new File("$repoFolder/$repo"))
+      GitVersion.determineVersion(new File("$repoFolder/$repo"), new GitVersion.Options()) == expectedVersion
 
     where:
       repo               | expectedVersion
@@ -48,6 +47,7 @@ class GitVersionTest extends Specification {
       branchName                                                 | expectedVersion
       "master"                                                   | "master-SNAPSHOT"
       "develop"                                                  | "develop-SNAPSHOT"
-      "bugfix/AOC-8-dialog-for-a-bekrefte-endring-av-tagversjon" | "bugfix_AOC_8_dialog_for_a_bekrefte_endring_av_tagversjon-SNAPSHOT"
+      "bugfix/AOC-8-dialog-for-a-bekrefte-endring-av-tagversjon" |
+          "bugfix_AOC_8_dialog_for_a_bekrefte_endring_av_tagversjon-SNAPSHOT"
   }
 }

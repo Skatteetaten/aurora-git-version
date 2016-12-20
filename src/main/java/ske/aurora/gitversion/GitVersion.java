@@ -30,6 +30,28 @@ public class GitVersion {
         return determineVersion(gitDir, new Options());
     }
 
+    /**
+     * Determines a version (typically for an application or software library) by inspecting the current state of
+     * the Git metadata.
+     * <p>
+     * The rules are as follows;
+     * <ol>
+     * <li>If HEAD is a tag and the name of that tag starts with <code>options.versionPrefix</code>, use the
+     * name of that tag with the prefix removed as the version name.</li>
+     * <li>If HEAD is not at a tag, and we are not in detached HEAD state, use the name of the current branch
+     * concatenated with <code>options.versionFromBranchNamePostfix</code> as the branch name</li>
+     * <li>If HEAD is not at a tag, and we are in detached HEAD state, first look for the presence of an environment
+     * variable with the name <code>fallbackBranchNameEnvName</code> and use that concatenated with
+     * <code>options.versionFromBranchNamePostfix</code> as the branch name</li>
+     * <li>If the environment variable does not exist, search for a branch with the commit in and use that concatenated
+     * with <code>options.versionFromBranchNamePostfix</code> as the branch name</li>
+     * </ol>
+     *
+     * @param gitDir
+     * @param options
+     * @return
+     * @throws IOException
+     */
     public static String determineVersion(File gitDir, Options options) throws IOException {
         return new GitVersion(gitDir, options).determineVersion();
     }
