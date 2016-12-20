@@ -18,6 +18,8 @@ public class GitVersion {
         public String versionPrefix = "v";
         public boolean fallbackToBranchNameEnv = true;
         public String fallbackVersion = "unknown";
+        public String fallbackBranchNameEnvName = "BRANCH_NAME";
+        public String versionFromBranchNamePostfix = "-SNAPSHOT";
     }
 
     private final Options options;
@@ -32,7 +34,7 @@ public class GitVersion {
         return new GitVersion(gitDir, options).determineVersion();
     }
 
-    private GitVersion(File gitDir, Options options) throws IOException {
+    protected GitVersion(File gitDir, Options options) throws IOException {
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         this.repository = builder.setGitDir(new File(gitDir, ".git"))
             .readEnvironment() // scan environment GIT_* variables
@@ -41,27 +43,31 @@ public class GitVersion {
         this.options = options;
     }
 
-    private String determineVersion() throws IOException {
+    protected String determineVersion() throws IOException {
         ObjectId head = repository.resolve("HEAD");
-        Optional<String> currentBranchName = getBranchName();
+        Optional<String> currentBranchName = getBranchName(head);
 
         Optional<String> versionTagOnHead = getVersionTagOnCommit(head);
 
-        return versionTagOnHead.map(this::getVersionFromVersionTag)
-            .orElseGet(() -> currentBranchName.map(this::getVersionFromBranchName).orElse(options.fallbackVersion));
+        return versionTagOnHead
+            .map(this::getVersionFromVersionTag)
+            .orElseGet(() -> currentBranchName
+                .map(this::getVersionFromBranchName)
+                .orElse(options.fallbackVersion));
     }
 
-    private String getVersionFromVersionTag(String versionTag) {
+    protected String getVersionFromVersionTag(String versionTag) {
 
         return versionTag.replaceFirst(options.versionPrefix, "");
     }
 
-    private String getVersionFromBranchName(String currentBranchName) {
+    protected String getVersionFromBranchName(String currentBranchName) {
 
-        return String.format("%s-SNAPSHOT", currentBranchName);
+        String versionSafeName = currentBranchName.replaceAll("[\\/-]", "_");
+        return String.format("%s%s", versionSafeName, options.versionFromBranchNamePostfix);
     }
 
-    private Optional<String> getVersionTagOnCommit(ObjectId commit) {
+    protected Optional<String> getVersionTagOnCommit(ObjectId commit) {
 
         return repository.getTags().entrySet().stream()
             .filter(entry -> entry.getValue().getObjectId().equals(commit))
@@ -70,25 +76,44 @@ public class GitVersion {
             .findFirst();
     }
 
-    private Optional<String> getBranchName() throws IOException {
+    protected Optional<String> getBranchName(ObjectId commitId) throws IOException {
 
-        ObjectId head = repository.resolve("HEAD");
         String currentBranchName = repository.getBranch();
 
-        if (!head.getName().equals(currentBranchName)) {
+        boolean isDetachedHead = commitId.getName().equals(currentBranchName);
+        if (!isDetachedHead) {
             return Optional.of(currentBranchName);
         }
 
+        return getBranchNameFromDetachedHead(commitId);
+    }
+
+    /**
+     * If we are trying to determine the branch name of the current commit when we are in detached head
+     * state, we need to resort to either hints or heuristics. This method will first check for the presence of
+     * an environment variable called <code>options.fallbackBranchNameEnvName</code> (default BRANCH_NAME). If it
+     * exists, its value will be used as branch name (Jenkins sets this environment variable before performing a
+     * build).
+     * <p>
+     * If the environment variable is not set we have to resort to a broad search for the commit. We pick the first
+     * branch we find the commit in.
+     *
+     * @param commitId
+     * @return
+     * @throws IOException
+     */
+    protected Optional<String> getBranchNameFromDetachedHead(ObjectId commitId) throws IOException {
+
         if (options.fallbackToBranchNameEnv) {
-            String branchNameFromEnv = System.getenv("BRANCH_NAME");
+            String branchNameFromEnv = System.getenv(options.fallbackBranchNameEnvName);
             if (branchNameFromEnv != null) {
                 return Optional.of(branchNameFromEnv);
             }
         }
 
         RevWalk walk = new RevWalk(repository);
-        RevCommit commit = walk.parseCommit(repository.resolve(head.getName() + "^0"));
-        Optional<String> branchOption = repository.getAllRefs().entrySet().stream()
+        RevCommit commit = walk.parseCommit(repository.resolve(commitId.getName() + "^0"));
+        return repository.getAllRefs().entrySet().stream()
             .filter(e -> e.getKey().startsWith(Constants.R_HEADS))
             .filter(e -> {
                 try {
@@ -99,6 +124,5 @@ public class GitVersion {
             })
             .map(e -> e.getValue().getName().replaceFirst("refs/heads/", ""))
             .findFirst();
-        return branchOption;
     }
 }
