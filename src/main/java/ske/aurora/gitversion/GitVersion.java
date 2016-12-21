@@ -36,15 +36,16 @@ public class GitVersion {
      * <p>
      * The rules are as follows;
      * <ol>
-     * <li>If HEAD is a tag and the name of that tag starts with <code>options.versionPrefix</code>, use the
+     * <li>If HEAD is at a tag and the name of that tag starts with <code>options.versionPrefix</code>, use the
      * name of that tag with the prefix removed as the version name.</li>
      * <li>If HEAD is not at a tag, and we are not in detached HEAD state, use the name of the current branch
-     * concatenated with <code>options.versionFromBranchNamePostfix</code> as the branch name</li>
+     * concatenated with <code>options.versionFromBranchNamePostfix</code> as the version name</li>
      * <li>If HEAD is not at a tag, and we are in detached HEAD state, first look for the presence of an environment
      * variable with the name <code>fallbackBranchNameEnvName</code> and use that concatenated with
-     * <code>options.versionFromBranchNamePostfix</code> as the branch name</li>
+     * <code>options.versionFromBranchNamePostfix</code> as the version name</li>
      * <li>If the environment variable does not exist, search for a branch with the commit in and use that concatenated
-     * with <code>options.versionFromBranchNamePostfix</code> as the branch name</li>
+     * with <code>options.versionFromBranchNamePostfix</code> as the version name. The first branch with the commit in
+     * it will be used.</li>
      * </ol>
      *
      * @param gitDir
