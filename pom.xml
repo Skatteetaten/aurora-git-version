@@ -20,9 +20,9 @@
   </distributionManagement>
 
   <scm>
-    <url>https://aurora/git/projects/AOP/repos/openshift-referanse-springboot-server/browse</url>
-    <connection>scm:git:https://aurora/git/scm/aop/openshift-referanse-springboot-server.git</connection>
-    <developerConnection>scm:git:https://aurora/git/scm/aop/openshift-referanse-springboot-server.git</developerConnection>
+    <url>https://aurora/git/projects/AUF/repos/aurora-git-version/browse</url>
+    <connection>scm:git:https://aurora/git/scm/AUF/aurora-git-version.git</connection>
+    <developerConnection>scm:git:https://aurora/git/scm/AUF/aurora-git-version.git</developerConnection>
   </scm>
 
   <properties>
