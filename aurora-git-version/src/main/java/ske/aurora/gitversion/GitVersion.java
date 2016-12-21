@@ -152,20 +152,40 @@ public class GitVersion {
             return versionPrefix;
         }
 
+        public void setVersionPrefix(String versionPrefix) {
+            this.versionPrefix = versionPrefix;
+        }
+
         public boolean isFallbackToBranchNameEnv() {
             return fallbackToBranchNameEnv;
+        }
+
+        public void setFallbackToBranchNameEnv(boolean fallbackToBranchNameEnv) {
+            this.fallbackToBranchNameEnv = fallbackToBranchNameEnv;
         }
 
         public String getFallbackVersion() {
             return fallbackVersion;
         }
 
+        public void setFallbackVersion(String fallbackVersion) {
+            this.fallbackVersion = fallbackVersion;
+        }
+
         public String getFallbackBranchNameEnvName() {
             return fallbackBranchNameEnvName;
         }
 
+        public void setFallbackBranchNameEnvName(String fallbackBranchNameEnvName) {
+            this.fallbackBranchNameEnvName = fallbackBranchNameEnvName;
+        }
+
         public String getVersionFromBranchNamePostfix() {
             return versionFromBranchNamePostfix;
+        }
+
+        public void setVersionFromBranchNamePostfix(String versionFromBranchNamePostfix) {
+            this.versionFromBranchNamePostfix = versionFromBranchNamePostfix;
         }
     }
 }
