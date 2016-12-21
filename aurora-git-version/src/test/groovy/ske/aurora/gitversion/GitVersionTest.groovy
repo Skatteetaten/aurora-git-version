@@ -23,8 +23,11 @@ class GitVersionTest extends Specification {
   @Unroll("#repo")
   def "Produces version from branch or tag name"() {
 
+    given:
+      def options = new GitVersion.Options(fallbackToBranchNameEnv: false)
+
     expect:
-      GitVersion.determineVersion(new File("$repoFolder/$repo"), new GitVersion.Options()) == expectedVersion
+      GitVersion.determineVersion(new File("$repoFolder/$repo"), options) == expectedVersion
 
     where:
       repo               | expectedVersion
