@@ -14,14 +14,6 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
 public class GitVersion {
 
-    public static class Options {
-        public String versionPrefix = "v";
-        public boolean fallbackToBranchNameEnv = true;
-        public String fallbackVersion = "unknown";
-        public String fallbackBranchNameEnvName = "BRANCH_NAME";
-        public String versionFromBranchNamePostfix = "-SNAPSHOT";
-    }
-
     private final Options options;
 
     private final Repository repository;
@@ -147,5 +139,33 @@ public class GitVersion {
             })
             .map(e -> e.getValue().getName().replaceFirst("refs/heads/", ""))
             .findFirst();
+    }
+
+    public static class Options {
+        private String versionPrefix = "v";
+        private boolean fallbackToBranchNameEnv = true;
+        private String fallbackVersion = "unknown";
+        private String fallbackBranchNameEnvName = "BRANCH_NAME";
+        private String versionFromBranchNamePostfix = "-SNAPSHOT";
+
+        public String getVersionPrefix() {
+            return versionPrefix;
+        }
+
+        public boolean isFallbackToBranchNameEnv() {
+            return fallbackToBranchNameEnv;
+        }
+
+        public String getFallbackVersion() {
+            return fallbackVersion;
+        }
+
+        public String getFallbackBranchNameEnvName() {
+            return fallbackBranchNameEnvName;
+        }
+
+        public String getVersionFromBranchNamePostfix() {
+            return versionFromBranchNamePostfix;
+        }
     }
 }

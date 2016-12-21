@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
-public class Main {
+public final class Main {
+    private Main() {
+    }
 
     public static void main(String[] args) throws IOException {
 
