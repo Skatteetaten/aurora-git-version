@@ -13,6 +13,6 @@ public final class Main {
         if (args.length == 1) {
             path = args[0];
         }
-        System.out.print(GitVersion.determineVersion(new File(path)));
+        System.out.print(GitVersion.determineVersion(new File(path)).getVersion());
     }
 }
