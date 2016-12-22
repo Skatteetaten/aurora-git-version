@@ -4,6 +4,8 @@ import static ske.aurora.gitversion.GitVersion.VersionSource.BRANCH
 import static ske.aurora.gitversion.GitVersion.VersionSource.TAG
 
 import org.apache.tools.ant.taskdefs.Expand
+import org.eclipse.jgit.lib.Repository
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -48,7 +50,11 @@ class GitVersionTest extends Specification {
     given:
       def options = new GitVersion.Options()
       options.versionPrefix = '-SNAPSHOT'
-      def version = new GitVersion(new File("$repoFolder/on_branch"), options)
+      Repository repository = new FileRepositoryBuilder()
+          .setGitDir(new File("$repoFolder/on_branch"))
+          .build();
+
+      def version = new GitVersion(repository, options)
 
     expect:
       version.getVersionFromBranchName(branchName).version == expectedVersion
