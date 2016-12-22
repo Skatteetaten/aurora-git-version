@@ -43,15 +43,22 @@ public class GitVersion {
      * @throws IOException
      */
     public static Version determineVersion(File gitDir, Options options) throws IOException {
-        return new GitVersion(gitDir, options).determineVersion();
-    }
-
-    protected GitVersion(File gitDir, Options options) throws IOException {
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
-        this.repository = builder.setGitDir(new File(gitDir, ".git"))
+        Repository repository = builder.setGitDir(new File(gitDir, ".git"))
             .readEnvironment() // scan environment GIT_* variables
             .setMustExist(true)
             .build();
+        return determineVersion(repository, options);
+    }
+
+    public static Version determineVersion(Repository repository, Options options) throws IOException {
+        return new GitVersion(repository, options).determineVersion();
+    }
+
+    protected GitVersion(Repository repository, Options options) throws IOException {
+        Assert.notNull(repository, "Repository cannot be null");
+        Assert.notNull(options, "Oepository cannot be null");
+        this.repository = repository;
         this.options = options;
     }
 
