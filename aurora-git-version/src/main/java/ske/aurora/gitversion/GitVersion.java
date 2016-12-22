@@ -93,7 +93,7 @@ public class GitVersion {
             .findFirst();
     }
 
-    protected Optional<String> getBranchName(ObjectId commitId) throws IOException {
+    public Optional<String> getBranchName(ObjectId commitId) throws IOException {
 
         String currentBranchName = repository.getBranch();
 
