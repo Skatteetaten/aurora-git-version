@@ -34,7 +34,6 @@
     <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
     <sonar.jacoco.reportPath>${project.basedir}/target/jacoco.exec</sonar.jacoco.reportPath>
 
-    <spock-core.version>1.0-groovy-2.4</spock-core.version>
   </properties>
 
   <modules>
@@ -192,7 +191,7 @@
     <dependency>
       <groupId>org.spockframework</groupId>
       <artifactId>spock-core</artifactId>
-      <version>${spock-core.version}</version>
+      <version>1.0-groovy-2.4</version>
       <scope>test</scope>
     </dependency>
     <dependency>
