@@ -93,7 +93,27 @@ public class GitVersion {
             .findFirst();
     }
 
-    public Optional<String> getBranchName(ObjectId commitId) throws IOException {
+    protected Optional<String> getBranchName(ObjectId commitId) throws IOException {
+
+        return getBranchName(this.repository, commitId, options.fallbackToBranchNameEnv,
+            options.fallbackBranchNameEnvName);
+    }
+
+    /**
+     * Determine the name of the current branch. The assumption is that head of the current branch is
+     * <code>commitId</code> and that commit will be used to determine if we are in detached head state. If we are
+     * in detached head state, we will fall back to the value of the environment variable
+     * <code>fallbackBranchNameEnvName</code> to use as branch name.
+     *
+     * @param repository
+     * @param commitId
+     * @param fallbackToBranchNameEnv
+     * @param fallbackBranchNameEnvName
+     * @return
+     * @throws IOException
+     */
+    public static Optional<String> getBranchName(Repository repository, ObjectId commitId,
+        boolean fallbackToBranchNameEnv, String fallbackBranchNameEnvName) throws IOException {
 
         String currentBranchName = repository.getBranch();
 
@@ -102,7 +122,7 @@ public class GitVersion {
             return Optional.of(currentBranchName);
         }
 
-        return getBranchNameFromDetachedHead(commitId);
+        return getBranchNameFromDetachedHead(repository, commitId, fallbackToBranchNameEnv, fallbackBranchNameEnvName);
     }
 
     /**
@@ -115,14 +135,19 @@ public class GitVersion {
      * If the environment variable is not set we have to resort to a broad search for the commit. We pick the first
      * branch we find the commit in.
      *
+     * @param repository
      * @param commitId
+     * @param fallbackToBranchNameEnv
+     * @param fallbackBranchNameEnvName
      * @return
      * @throws IOException
      */
-    protected Optional<String> getBranchNameFromDetachedHead(ObjectId commitId) throws IOException {
+    protected static Optional<String> getBranchNameFromDetachedHead(Repository repository, ObjectId commitId,
+        boolean fallbackToBranchNameEnv,
+        String fallbackBranchNameEnvName) throws IOException {
 
-        if (options.fallbackToBranchNameEnv) {
-            String branchNameFromEnv = System.getenv(options.fallbackBranchNameEnvName);
+        if (fallbackToBranchNameEnv) {
+            String branchNameFromEnv = System.getenv(fallbackBranchNameEnvName);
             if (branchNameFromEnv != null) {
                 return Optional.of(branchNameFromEnv);
             }
