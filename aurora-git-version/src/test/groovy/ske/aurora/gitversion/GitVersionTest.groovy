@@ -1,5 +1,8 @@
 package ske.aurora.gitversion
 
+import static ske.aurora.gitversion.GitVersion.VersionSource.BRANCH
+import static ske.aurora.gitversion.GitVersion.VersionSource.TAG
+
 import org.apache.tools.ant.taskdefs.Expand
 
 import spock.lang.Specification
@@ -26,14 +29,18 @@ class GitVersionTest extends Specification {
     given:
       def options = new GitVersion.Options(fallbackToBranchNameEnv: false)
 
-    expect:
-      GitVersion.determineVersion(new File("$repoFolder/$repo"), options) == expectedVersion
+    when:
+      def version = GitVersion.determineVersion(new File("$repoFolder/$repo"), options)
+
+    then:
+      version.version == expectedVersion
+      version.source == versionSource
 
     where:
-      repo               | expectedVersion
-      "on_branch"        | "develop-SNAPSHOT"
-      "on_tag"           | "1.0.0"
-      "on_detached_head" | "develop-SNAPSHOT"
+      repo               | expectedVersion    | versionSource
+      "on_branch"        | "develop-SNAPSHOT" | BRANCH
+      "on_tag"           | "1.0.0"            | TAG
+      "on_detached_head" | "develop-SNAPSHOT" | BRANCH
   }
 
   def "Version from branch name"() {

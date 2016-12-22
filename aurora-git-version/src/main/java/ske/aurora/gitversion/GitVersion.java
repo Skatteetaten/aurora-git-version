@@ -18,7 +18,7 @@ public class GitVersion {
 
     private final Repository repository;
 
-    public static String determineVersion(File gitDir) throws IOException {
+    public static Version determineVersion(File gitDir) throws IOException {
         return determineVersion(gitDir, new Options());
     }
 
@@ -45,7 +45,7 @@ public class GitVersion {
      * @return
      * @throws IOException
      */
-    public static String determineVersion(File gitDir, Options options) throws IOException {
+    public static Version determineVersion(File gitDir, Options options) throws IOException {
         return new GitVersion(gitDir, options).determineVersion();
     }
 
@@ -58,7 +58,7 @@ public class GitVersion {
         this.options = options;
     }
 
-    protected String determineVersion() throws IOException {
+    protected Version determineVersion() throws IOException {
         ObjectId head = repository.resolve("HEAD");
         Optional<String> currentBranchName = getBranchName(head);
 
@@ -68,18 +68,20 @@ public class GitVersion {
             .map(this::getVersionFromVersionTag)
             .orElseGet(() -> currentBranchName
                 .map(this::getVersionFromBranchName)
-                .orElse(options.fallbackVersion));
+                .orElse(new Version(options.fallbackVersion, VersionSource.FALLBACK)));
     }
 
-    protected String getVersionFromVersionTag(String versionTag) {
+    protected Version getVersionFromVersionTag(String versionTag) {
 
-        return versionTag.replaceFirst(options.versionPrefix, "");
+        String version = versionTag.replaceFirst(options.versionPrefix, "");
+        return new Version(version, VersionSource.TAG);
     }
 
-    protected String getVersionFromBranchName(String currentBranchName) {
+    protected Version getVersionFromBranchName(String currentBranchName) {
 
         String versionSafeName = currentBranchName.replaceAll("[\\/-]", "_");
-        return String.format("%s%s", versionSafeName, options.versionFromBranchNamePostfix);
+        String version = String.format("%s%s", versionSafeName, options.versionFromBranchNamePostfix);
+        return new Version(version, VersionSource.BRANCH);
     }
 
     protected Optional<String> getVersionTagOnCommit(ObjectId commit) {
@@ -139,6 +141,32 @@ public class GitVersion {
             })
             .map(e -> e.getValue().getName().replaceFirst("refs/heads/", ""))
             .findFirst();
+    }
+
+    public enum VersionSource {
+        TAG,
+        BRANCH,
+        FALLBACK
+    }
+
+    public static class Version {
+
+        private String version;
+
+        private VersionSource source;
+
+        public Version(String version, VersionSource source) {
+            this.version = version;
+            this.source = source;
+        }
+
+        public String getVersion() {
+            return version;
+        }
+
+        public VersionSource getSource() {
+            return source;
+        }
     }
 
     public static class Options {
