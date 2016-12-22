@@ -51,7 +51,7 @@ class GitVersionTest extends Specification {
       def version = new GitVersion(new File("$repoFolder/on_branch"), options)
 
     expect:
-      version.getVersionFromBranchName(branchName) == expectedVersion
+      version.getVersionFromBranchName(branchName).version == expectedVersion
 
     where:
       branchName                                                 | expectedVersion
