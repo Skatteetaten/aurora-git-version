@@ -1,0 +1,22 @@
+package ske.aurora.version.suggest
+
+class ReleaseVersionEvaluator {
+  VersionNumber currentVersion
+
+  public ReleaseVersionEvaluator(String versionNumber) {
+    this.currentVersion = VersionNumber.parse(versionNumber)
+  }
+
+  VersionNumber suggestNextReleaseVersionFrom(listOfVersions) {
+    def orderedListOfEligibleVersions = listOfVersions
+        .findAll { VersionNumber.isValid(it) }
+        .collect { VersionNumber.parse(it) }
+        .sort()
+        .findAll { currentVersion.canBeUsedWhenDeterminingReleaseVersion(it) }
+    if (orderedListOfEligibleVersions.empty) {
+      return currentVersion.unlockVersion()
+    } else {
+      orderedListOfEligibleVersions.last().adaptTo(currentVersion).incrementLastSegment()
+    }
+  }
+}
