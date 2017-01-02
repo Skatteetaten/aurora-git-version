@@ -1,4 +1,4 @@
-package ske.aurora.gitversion;
+package ske.aurora.version.git;
 
 public final class Assert {
 

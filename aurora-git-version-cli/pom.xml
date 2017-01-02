@@ -18,7 +18,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>ske.aurora.gitversion.Main</mainClass>
+              <mainClass>ske.aurora.version.git.Main</mainClass>
             </manifest>
           </archive>
           <descriptorRefs>

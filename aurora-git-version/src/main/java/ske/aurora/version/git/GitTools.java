@@ -1,4 +1,4 @@
-package ske.aurora.gitversion;
+package ske.aurora.version.git;
 
 import java.io.IOException;
 import java.util.Optional;

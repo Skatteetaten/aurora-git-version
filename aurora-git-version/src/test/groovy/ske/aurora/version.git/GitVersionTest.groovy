@@ -1,14 +1,13 @@
-package ske.aurora.gitversion
-
-import static ske.aurora.gitversion.GitVersion.VersionSource.BRANCH
-import static ske.aurora.gitversion.GitVersion.VersionSource.TAG
+package ske.aurora.version.git
 
 import org.apache.tools.ant.taskdefs.Expand
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
-
 import spock.lang.Specification
 import spock.lang.Unroll
+
+import static ske.aurora.version.git.GitVersion.VersionSource.BRANCH
+import static ske.aurora.version.git.GitVersion.VersionSource.TAG
 
 class GitVersionTest extends Specification {
 
