@@ -127,6 +127,10 @@ public class GitVersion {
         public VersionSource getSource() {
             return source;
         }
+
+        public boolean isFromTag() {
+            return getSource() == VersionSource.TAG;
+        }
     }
 
     public static class Options {

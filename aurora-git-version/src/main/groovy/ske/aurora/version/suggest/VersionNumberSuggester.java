@@ -35,15 +35,21 @@ public class VersionNumberSuggester {
 
     private String suggestVersionInternal() throws IOException {
 
-        if (shouldInferReleaseVersion()) {
+        GitVersion.Version versionFromGit = getVersionFromGit();
+        if (shouldInferReleaseVersion(versionFromGit)) {
             return getInferredVersion();
         }
-        return getVersionFromGit();
+        return versionFromGit.getVersion();
     }
 
-    private boolean shouldInferReleaseVersion() throws IOException {
+    private boolean shouldInferReleaseVersion(GitVersion.Version versionFromGit) throws IOException {
 
-        Optional<String> currentBranchOption = GitTools.getBranchName(repository, true, "BRANCH_NAME");
+        if (versionFromGit.isFromTag()) {
+            return false;
+        }
+
+        Optional<String> currentBranchOption =
+            GitTools.getBranchName(repository, options.fallbackToBranchNameEnv, options.fallbackBranchNameEnvName);
 
         String currentBranch = currentBranchOption
             .orElseThrow(() -> new IllegalStateException("Unable to determine name of current branch"));
@@ -59,13 +65,18 @@ public class VersionNumberSuggester {
         return inferredVersion.toString();
     }
 
-    private String getVersionFromGit() throws IOException {
+    private GitVersion.Version getVersionFromGit() throws IOException {
 
-        GitVersion.Options gitVersionOptions = new GitVersion.Options();
-        gitVersionOptions.setVersionPrefix(options.versionPrefix);
+        GitVersion.Options gitVersionOptions = createGitVersionOptions(options);
+        return GitVersion.determineVersion(repository, gitVersionOptions);
+    }
 
-        GitVersion.Version versionFromGit = GitVersion.determineVersion(repository, gitVersionOptions);
-        return versionFromGit.getVersion();
+    private static GitVersion.Options createGitVersionOptions(Options options) {
+        return new GitVersion.Options() {{
+            setFallbackBranchNameEnvName(options.getFallbackBranchNameEnvName());
+            setFallbackToBranchNameEnv(options.isFallbackToBranchNameEnv());
+            setVersionPrefix(options.getVersionPrefix());
+        }};
     }
 
     private List<String> getAllVersionsFromTags() {
@@ -114,6 +125,22 @@ public class VersionNumberSuggester {
 
         public void setVersionHint(String versionHint) {
             this.versionHint = versionHint;
+        }
+
+        public boolean isFallbackToBranchNameEnv() {
+            return fallbackToBranchNameEnv;
+        }
+
+        public void setFallbackToBranchNameEnv(boolean fallbackToBranchNameEnv) {
+            this.fallbackToBranchNameEnv = fallbackToBranchNameEnv;
+        }
+
+        public String getFallbackBranchNameEnvName() {
+            return fallbackBranchNameEnvName;
+        }
+
+        public void setFallbackBranchNameEnvName(String fallbackBranchNameEnvName) {
+            this.fallbackBranchNameEnvName = fallbackBranchNameEnvName;
         }
     }
 }
