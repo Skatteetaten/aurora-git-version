@@ -3,8 +3,9 @@ package ske.aurora.version.suggest;
 import java.util.List;
 import java.util.stream.Collectors;
 
-class ReleaseVersionEvaluator {
-    VersionNumber currentVersion;
+public class ReleaseVersionEvaluator {
+
+    private VersionNumber currentVersion;
 
     public ReleaseVersionEvaluator(String versionNumber) {
         this.currentVersion = VersionNumber.parse(versionNumber);
