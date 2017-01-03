@@ -123,13 +123,26 @@ class VersionNumberSpec extends Specification {
       increasedVersion.toString() == "3.2.2";
   }
 
+  def "last version number is incremented with snapshots"() {
+    given:
+      def version = VersionNumber.parse("3.2-SNAPSHOT");
+    when:
+      def increasedVersion = version.incrementLastSegment();
+    then:
+      increasedVersion.toString() == "3.3-SNAPSHOT";
+  }
+
   def "Version numbers is extended with another segment with value 0 when unlocked"() {
     given:
-      def developmentVersion = VersionNumber.parse("3.3-SNAPSHOT");
+      def developmentVersion = VersionNumber.parse(version)
     when:
-      def unlockedVersion = developmentVersion.unlockVersion();
+      def unlockedVersion = developmentVersion.unlockVersion()
     then:
-      unlockedVersion.toString() == "3.3.0";
+      unlockedVersion.toString() == expectedVersion
+    where:
+      version        | expectedVersion
+      "3.3-SNAPSHOT" | "3.3.0"
+      "3-SNAPSHOT"   | "3.0.0"
   }
 
   def "example of valid version numbers"() {
