@@ -5,9 +5,9 @@ import static java.util.Collections.emptyList;
 import java.util.List;
 
 /**
- * Options for the <code>{@link VersionNumberSuggester.suggestVersion}</code> method.
+ * SuggesterOptions for the <code>{@link VersionNumberSuggester#suggestVersion}</code> method.
  */
-public class Options {
+public class SuggesterOptions {
 
     /**
      * The prefix of the tags that are used for indicating a version. Tags that do not have this prefix are ignored.

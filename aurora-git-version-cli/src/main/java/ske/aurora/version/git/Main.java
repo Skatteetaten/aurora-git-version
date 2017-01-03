@@ -2,7 +2,7 @@ package ske.aurora.version.git;
 
 import java.io.IOException;
 
-import ske.aurora.version.Options;
+import ske.aurora.version.SuggesterOptions;
 import ske.aurora.version.VersionNumberSuggester;
 
 public final class Main {
@@ -15,7 +15,7 @@ public final class Main {
         if (args.length == 1) {
             path = args[0];
         }
-        Options options = new Options();
+        SuggesterOptions options = new SuggesterOptions();
         options.setGitRepoPath(path);
         System.out.println(VersionNumberSuggester.suggestVersion(options));
     }

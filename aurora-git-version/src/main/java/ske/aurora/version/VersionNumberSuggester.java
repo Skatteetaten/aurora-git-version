@@ -22,19 +22,19 @@ public final class VersionNumberSuggester {
 
     private final Repository repository;
 
-    private final Options options;
+    private final SuggesterOptions options;
 
     public static String suggestVersion() throws IOException {
-        return suggestVersion(new Options());
+        return suggestVersion(new SuggesterOptions());
     }
 
-    public static String suggestVersion(Options options) throws IOException {
+    public static String suggestVersion(SuggesterOptions options) throws IOException {
 
         Repository repository = getGitRepository(options.getGitRepoPath());
         return new VersionNumberSuggester(repository, options).suggestVersionInternal();
     }
 
-    private VersionNumberSuggester(Repository repository, Options options) {
+    private VersionNumberSuggester(Repository repository, SuggesterOptions options) {
         this.repository = repository;
         this.options = options;
     }
@@ -72,7 +72,7 @@ public final class VersionNumberSuggester {
         return inferredVersion.toString();
     }
 
-    private static GitVersion.Options createGitVersionOptions(Options options) {
+    private static GitVersion.Options createGitVersionOptions(SuggesterOptions options) {
         return new GitVersion.Options() {
             {
                 setFallbackBranchNameEnvName(options.getFallbackBranchNameEnvName());

@@ -59,7 +59,7 @@ public class GitVersion {
 
     protected GitVersion(Repository repository, Options options) throws IOException {
         Assert.notNull(repository, "Repository cannot be null");
-        Assert.notNull(options, "Options cannot be null");
+        Assert.notNull(options, "SuggesterOptions cannot be null");
         this.repository = repository;
         this.options = options;
     }
