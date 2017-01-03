@@ -121,7 +121,7 @@ public final class VersionNumberSuggester {
          * A list of branch names that should have versions inferred based on earlier versions and the
          * <code>versionHint</code> when the version cannot be determined from an existing tag.
          */
-        private List<String> branchesToInferReleaseVersionsFor = Collections.singletonList("master");
+        private List<String> branchesToInferReleaseVersionsFor = emptyList();
 
         /**
          * TODO: Document
