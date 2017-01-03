@@ -7,9 +7,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import ske.aurora.version.utils.Integers;
+
 public class VersionNumber implements Comparable<VersionNumber> {
 
-    public static final String snapshot_notation = "-SNAPSHOT";
+    public static final String SNAPSHOT_NOTATION = "-SNAPSHOT";
 
     List<String> versionNumberSegments;
 
@@ -22,12 +24,12 @@ public class VersionNumber implements Comparable<VersionNumber> {
     }
 
     public String toString() {
-        return versionNumberSegments.stream().collect(Collectors.joining(".")) + (isSnapshot ? snapshot_notation : "");
+        return versionNumberSegments.stream().collect(Collectors.joining(".")) + (isSnapshot ? SNAPSHOT_NOTATION : "");
     }
 
     public static boolean isValid(String versionString) {
-        String pattern = versionString.contains(snapshot_notation)
-            ? "\\d+(.\\d+)*(" + snapshot_notation + ")?"
+        String pattern = versionString.contains(SNAPSHOT_NOTATION)
+            ? "\\d+(.\\d+)*(" + SNAPSHOT_NOTATION + ")?"
             : "^(\\d+\\.)(\\d+\\.)(\\d+)$";
         Pattern r = Pattern.compile(pattern);
         Matcher m = r.matcher(versionString);
@@ -39,8 +41,8 @@ public class VersionNumber implements Comparable<VersionNumber> {
             throw new IllegalArgumentException(
                 String.format("the version number %s is not well formatted", versionString));
         }
-        List<String> segments = Arrays.asList(versionString.replaceAll(snapshot_notation + "$", "").split("\\."));
-        return new VersionNumber(segments, versionString.endsWith(snapshot_notation));
+        List<String> segments = Arrays.asList(versionString.replaceAll(SNAPSHOT_NOTATION + "$", "").split("\\."));
+        return new VersionNumber(segments, versionString.endsWith(SNAPSHOT_NOTATION));
     }
 
     public VersionNumber shorten(int newLength) {
@@ -83,29 +85,16 @@ public class VersionNumber implements Comparable<VersionNumber> {
 
     public VersionNumber unlockVersion() {
 
-        if (versionNumberSegments.size() == 3) {
-            return new VersionNumber(versionNumberSegments, false);
-        }
         List<String> segments = new ArrayList<>(versionNumberSegments);
-        for (int i=0; i<3-versionNumberSegments.size(); i++) {
-            segments.add("0");
-        }
+        Integers.times(3 - versionNumberSegments.size(), () -> segments.add("0"));
         return new VersionNumber(segments, false);
     }
 
     public VersionNumber adaptTo(VersionNumber example) {
 
-        int newSize;
-        if (example.versionNumberSegments.size() == 3) {
-            newSize = versionNumberSegments.size();
-        } else {
-            newSize = versionNumberSegments.size() - (versionNumberSegments.size() - 3);
-        }
-
+        int newSize = versionNumberSegments.size() - (versionNumberSegments.size() - 3);
         List<String> adaptation = versionNumberSegments.subList(0, newSize);
-        for (int i = 0; i < (newSize - adaptation.size()); i++) {
-            adaptation.add("0");
-        }
+        Integers.times((newSize - adaptation.size()), () -> adaptation.add("0"));
         return new VersionNumber(adaptation, false);
     }
 

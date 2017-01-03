@@ -9,6 +9,8 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
+import ske.aurora.version.utils.Assert;
+
 public class GitVersion {
 
     private final Options options;
