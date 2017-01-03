@@ -1,4 +1,4 @@
-package ske.aurora.version.suggest;
+package ske.aurora.version;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,10 +12,13 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
 import ske.aurora.version.git.GitTools;
 import ske.aurora.version.git.GitVersion;
+import ske.aurora.version.suggest.ReleaseVersionEvaluator;
+import ske.aurora.version.suggest.VersionNumber;
 
-public class VersionNumberSuggester {
+public final class VersionNumberSuggester {
 
     private final Repository repository;
+
     private final Options options;
 
     public static String suggestVersion() throws IOException {
@@ -72,11 +75,13 @@ public class VersionNumberSuggester {
     }
 
     private static GitVersion.Options createGitVersionOptions(Options options) {
-        return new GitVersion.Options() {{
-            setFallbackBranchNameEnvName(options.getFallbackBranchNameEnvName());
-            setFallbackToBranchNameEnv(options.isFallbackToBranchNameEnv());
-            setVersionPrefix(options.getVersionPrefix());
-        }};
+        return new GitVersion.Options() {
+            {
+                setFallbackBranchNameEnvName(options.getFallbackBranchNameEnvName());
+                setFallbackToBranchNameEnv(options.isFallbackToBranchNameEnv());
+                setVersionPrefix(options.getVersionPrefix());
+            }
+        };
     }
 
     private List<String> getAllVersionsFromTags() {

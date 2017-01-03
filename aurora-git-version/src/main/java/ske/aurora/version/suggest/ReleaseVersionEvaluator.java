@@ -11,7 +11,7 @@ public class ReleaseVersionEvaluator {
         this.currentVersion = VersionNumber.parse(versionNumber);
     }
 
-    VersionNumber suggestNextReleaseVersionFrom(List<String> listOfVersions) {
+    public VersionNumber suggestNextReleaseVersionFrom(List<String> listOfVersions) {
         List<VersionNumber> orderedListOfEligibleVersions = listOfVersions.stream()
             .filter(VersionNumber::isValid)
             .map(VersionNumber::parse)

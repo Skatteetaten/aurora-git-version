@@ -9,13 +9,13 @@ import java.util.stream.Collectors;
 
 import ske.aurora.version.utils.Integers;
 
-public class VersionNumber implements Comparable<VersionNumber> {
+public final class VersionNumber implements Comparable<VersionNumber> {
 
     public static final String SNAPSHOT_NOTATION = "-SNAPSHOT";
 
-    List<String> versionNumberSegments;
+    private List<String> versionNumberSegments;
 
-    boolean isSnapshot;
+    private boolean isSnapshot;
 
     private VersionNumber(List<String> versionNumberSegments, boolean isSnapshot) {
 
@@ -104,5 +104,13 @@ public class VersionNumber implements Comparable<VersionNumber> {
         lastElement += 1;
         newSegments.add(lastElement.toString());
         return new VersionNumber(newSegments, isSnapshot);
+    }
+
+    public List<String> getVersionNumberSegments() {
+        return versionNumberSegments;
+    }
+
+    public boolean isSnapshot() {
+        return isSnapshot;
     }
 }
