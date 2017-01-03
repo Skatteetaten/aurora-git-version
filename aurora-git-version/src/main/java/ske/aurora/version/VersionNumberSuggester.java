@@ -1,8 +1,9 @@
 package ske.aurora.version;
 
+import static java.util.Collections.emptyList;
+
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -27,7 +28,7 @@ public final class VersionNumberSuggester {
 
     public static String suggestVersion(Options options) throws IOException {
 
-        Repository repository = getGitRepository();
+        Repository repository = getGitRepository(options.getGitRepoPath());
         return new VersionNumberSuggester(repository, options).suggestVersionInternal();
     }
 
@@ -38,7 +39,7 @@ public final class VersionNumberSuggester {
 
     private String suggestVersionInternal() throws IOException {
 
-        GitVersion.Version versionFromGit = getVersionFromGit();
+        GitVersion.Version versionFromGit = GitVersion.determineVersion(repository, createGitVersionOptions(options));
         if (shouldInferReleaseVersion(versionFromGit)) {
             return getInferredVersion();
         }
@@ -68,12 +69,6 @@ public final class VersionNumberSuggester {
         return inferredVersion.toString();
     }
 
-    private GitVersion.Version getVersionFromGit() throws IOException {
-
-        GitVersion.Options gitVersionOptions = createGitVersionOptions(options);
-        return GitVersion.determineVersion(repository, gitVersionOptions);
-    }
-
     private static GitVersion.Options createGitVersionOptions(Options options) {
         return new GitVersion.Options() {
             {
@@ -92,9 +87,9 @@ public final class VersionNumberSuggester {
             .collect(Collectors.toList());
     }
 
-    private static Repository getGitRepository() throws IOException {
+    private static Repository getGitRepository(String gitRepoPath) throws IOException {
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
-        return builder.setGitDir(new File("./", ".git"))
+        return builder.setGitDir(new File(gitRepoPath, ".git"))
             .readEnvironment()
             .setMustExist(true)
             .build();
@@ -132,6 +127,11 @@ public final class VersionNumberSuggester {
          * TODO: Document
          */
         private String versionHint = null;
+
+        /**
+         * The path of the git repository to use
+         */
+        private String gitRepoPath;
 
         public List<String> getBranchesToInferReleaseVersionsFor() {
             return branchesToInferReleaseVersionsFor;
@@ -171,6 +171,14 @@ public final class VersionNumberSuggester {
 
         public void setFallbackBranchNameEnvName(String fallbackBranchNameEnvName) {
             this.fallbackBranchNameEnvName = fallbackBranchNameEnvName;
+        }
+
+        public String getGitRepoPath() {
+            return gitRepoPath;
+        }
+
+        public void setGitRepoPath(String gitRepoPath) {
+            this.gitRepoPath = gitRepoPath;
         }
     }
 }

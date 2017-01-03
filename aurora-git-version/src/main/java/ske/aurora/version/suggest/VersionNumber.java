@@ -28,6 +28,10 @@ public final class VersionNumber implements Comparable<VersionNumber> {
     }
 
     public static boolean isValid(String versionString) {
+
+        if (versionString == null) {
+            throw new IllegalArgumentException("version string cannot be null");
+        }
         String pattern = versionString.contains(SNAPSHOT_NOTATION)
             ? "\\d+(.\\d+)*(" + SNAPSHOT_NOTATION + ")?"
             : "^(\\d+\\.)(\\d+\\.)(\\d+)$";
@@ -37,6 +41,7 @@ public final class VersionNumber implements Comparable<VersionNumber> {
     }
 
     public static VersionNumber parse(String versionString) {
+
         if (!isValid(versionString)) {
             throw new IllegalArgumentException(
                 String.format("the version number %s is not well formatted", versionString));
@@ -46,6 +51,7 @@ public final class VersionNumber implements Comparable<VersionNumber> {
     }
 
     public VersionNumber shorten(int newLength) {
+
         return new VersionNumber(versionNumberSegments.subList(0, newLength), isSnapshot);
     }
 
@@ -99,6 +105,7 @@ public final class VersionNumber implements Comparable<VersionNumber> {
     }
 
     public VersionNumber incrementLastSegment() {
+
         List<String> newSegments = new ArrayList<>(versionNumberSegments.subList(0, versionNumberSegments.size() - 1));
         Integer lastElement = Integer.parseInt(versionNumberSegments.get(versionNumberSegments.size() - 1));
         lastElement += 1;
@@ -107,10 +114,12 @@ public final class VersionNumber implements Comparable<VersionNumber> {
     }
 
     public List<String> getVersionNumberSegments() {
+
         return versionNumberSegments;
     }
 
     public boolean isSnapshot() {
+
         return isSnapshot;
     }
 }
