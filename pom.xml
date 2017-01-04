@@ -157,7 +157,7 @@
             <version>6.16.1</version>
           </dependency>
           <dependency>
-            <groupId>no.skatteetaten.aurora.checkstyle</groupId>
+            <groupId>ske.aurora.checkstyle</groupId>
             <artifactId>checkstyle-config</artifactId>
             <version>0.6</version>
           </dependency>
