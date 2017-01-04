@@ -15,6 +15,9 @@ import ske.aurora.version.SuggesterOptions;
 import ske.aurora.version.VersionNumberSuggester;
 
 public final class Main {
+
+    public static final int HELP_WIDTH = 150;
+
     private Main() {
     }
 
@@ -30,7 +33,13 @@ public final class Main {
             return;
         }
 
-        SuggesterOptions suggesterOptions = createSuggesterOptionsFromApplicationArgs(cmd);
+        SuggesterOptions suggesterOptions;
+        try {
+            suggesterOptions = createSuggesterOptionsFromApplicationArgs(cmd);
+        } catch (IllegalArgumentException e) {
+            showHelp(options);
+            return;
+        }
 
         System.out.println(VersionNumberSuggester.suggestVersion(suggesterOptions));
     }
@@ -43,11 +52,18 @@ public final class Main {
             split(","))
             .map(String::trim)
             .collect(Collectors.toList());
+        String versionHint = cmd.getOptionValue("version-hint", "");
+        if (!branchesToStipulateReleaseVersionsFor.isEmpty()) {
+            if (versionHint.isEmpty()) {
+                throw new IllegalArgumentException("version-hint is required when using suggest-releases");
+            }
+        }
 
         SuggesterOptions suggesterOptions = new SuggesterOptions();
         suggesterOptions.setGitRepoPath(path);
         suggesterOptions.setBranchesToInferReleaseVersionsFor(branchesToStipulateReleaseVersionsFor);
-        
+        suggesterOptions.setVersionHint(versionHint);
+
         return suggesterOptions;
     }
 
@@ -61,13 +77,18 @@ public final class Main {
             .hasArg()
             .argName("BRANCH-CSV")
             .build());
+        options.addOption(Option.builder().longOpt("version-hint")
+            .desc("the version hint to use when suggesting the next release version "
+                + "- required when using --suggest-releases")
+            .hasArg()
+            .build());
         return options;
     }
 
     private static void showHelp(Options options) {
 
         HelpFormatter formatter = new HelpFormatter();
-        formatter.setWidth(150);
+        formatter.setWidth(HELP_WIDTH);
         formatter.printHelp("java -jar aurora-git-version-cli.jar", options);
     }
 }
