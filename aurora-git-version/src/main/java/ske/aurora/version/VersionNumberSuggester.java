@@ -54,9 +54,8 @@ public final class VersionNumberSuggester {
             return false;
         }
 
-        Optional<String> currentBranchOption =
-            GitTools
-                .getBranchName(repository, options.isFallbackToBranchNameEnv(), options.getFallbackBranchNameEnvName());
+        Optional<String> currentBranchOption = GitTools
+            .getBranchName(repository, options.isFallbackToBranchNameEnv(), options.getFallbackBranchNameEnvName());
 
         String currentBranch = currentBranchOption
             .orElseThrow(() -> new IllegalStateException("Unable to determine name of current branch"));
@@ -73,13 +72,11 @@ public final class VersionNumberSuggester {
     }
 
     private static GitVersion.Options createGitVersionOptions(SuggesterOptions options) {
-        return new GitVersion.Options() {
-            {
-                setFallbackBranchNameEnvName(options.getFallbackBranchNameEnvName());
-                setFallbackToBranchNameEnv(options.isFallbackToBranchNameEnv());
-                setVersionPrefix(options.getVersionPrefix());
-            }
-        };
+        GitVersion.Options o = new GitVersion.Options();
+        o.setFallbackBranchNameEnvName(options.getFallbackBranchNameEnvName());
+        o.setFallbackToBranchNameEnv(options.isFallbackToBranchNameEnv());
+        o.setVersionPrefix(options.getVersionPrefix());
+        return o;
     }
 
     private List<String> getAllVersionsFromTags() {

@@ -9,6 +9,10 @@ import java.util.stream.Collectors;
 
 import ske.aurora.version.utils.Integers;
 
+/**
+ * This class is a Java implementation of Tommy Bø's original implementation in Groovy that could be found in the
+ * aurora-cd maven plugin. It has been reimplemented in Java without changing any of the core logic.
+ */
 public final class VersionNumber implements Comparable<VersionNumber> {
 
     public static final String SNAPSHOT_NOTATION = "-SNAPSHOT";

@@ -3,6 +3,10 @@ package ske.aurora.version.suggest;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * This class is a Java implementation of Tommy Bø's original implementation in Groovy that could be found in the
+ * aurora-cd maven plugin. It has been reimplemented in Java without changing any of the core logic.
+ */
 public class ReleaseVersionEvaluator {
 
     private VersionNumber currentVersion;
