@@ -1,4 +1,4 @@
-package ske.aurora.gitversion;
+package ske.aurora.version.git;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,6 +8,8 @@ import java.util.Optional;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+
+import ske.aurora.version.utils.Assert;
 
 public class GitVersion {
 
@@ -57,7 +59,7 @@ public class GitVersion {
 
     protected GitVersion(Repository repository, Options options) throws IOException {
         Assert.notNull(repository, "Repository cannot be null");
-        Assert.notNull(options, "Options cannot be null");
+        Assert.notNull(options, "SuggesterOptions cannot be null");
         this.repository = repository;
         this.options = options;
     }
@@ -126,6 +128,10 @@ public class GitVersion {
 
         public VersionSource getSource() {
             return source;
+        }
+
+        public boolean isFromTag() {
+            return getSource() == VersionSource.TAG;
         }
     }
 
