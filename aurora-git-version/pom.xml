@@ -11,6 +11,10 @@
   <artifactId>aurora-git-version</artifactId>
   <packaging>jar</packaging>
 
+  <properties>
+    <sonar.tests>src/test/groovy</sonar.tests>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.eclipse.jgit</groupId>
