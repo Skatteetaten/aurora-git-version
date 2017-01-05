@@ -30,3 +30,8 @@ the hint ```1.0-SNAPSHOT```, the version will become ```1.0.2```.
 The library does not tag and push the suggested version, so to avoid suggesting the same non-snapshot version for a
 future commit you are responsible yourself (or by the support of plugins) to tag the current commit appropriately and
 push the new tag.
+
+
+## Example usage
+
+TODO
