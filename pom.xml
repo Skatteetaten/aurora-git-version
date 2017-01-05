@@ -47,7 +47,7 @@
         <plugin>
           <groupId>ske.aurora.maven.plugins</groupId>
           <artifactId>aurora-cd</artifactId>
-          <version>1.0.6</version>
+          <version>AOS-711-generere-semantisk-riktige-versjoner-SNAPSHOT</version>
         </plugin>
         <plugin>
           <groupId>org.codehaus.gmavenplus</groupId>
