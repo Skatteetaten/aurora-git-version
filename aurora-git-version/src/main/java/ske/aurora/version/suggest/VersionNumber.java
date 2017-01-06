@@ -102,7 +102,10 @@ public final class VersionNumber implements Comparable<VersionNumber> {
 
     public VersionNumber adaptTo(VersionNumber example) {
 
-        int newSize = versionNumberSegments.size() - (versionNumberSegments.size() - 3);
+        int newSize = example.versionNumberSegments.size() == 3
+            ? versionNumberSegments.size()
+            : versionNumberSegments.size() - (versionNumberSegments.size() - 3);
+
         List<String> adaptation = versionNumberSegments.subList(0, newSize);
         Integers.times((newSize - adaptation.size()), () -> adaptation.add("0"));
         return new VersionNumber(adaptation, false);
