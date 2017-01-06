@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-def scriptVersion = 'feature/AOS-711-generere-semantisk-riktige-versjoner'
+def scriptVersion = 'v2.0.0-RC1'
 def jenkinsfile
 fileLoader.withGit('https://git.sits.no/git/scm/ao/aurora-pipeline-scripts.git', scriptVersion) {
    jenkinsfile = fileLoader.load('templates/bibliotek')
