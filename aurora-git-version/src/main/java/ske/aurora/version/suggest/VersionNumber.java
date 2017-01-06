@@ -27,10 +27,6 @@ public final class VersionNumber implements Comparable<VersionNumber> {
         this.isSnapshot = isSnapshot;
     }
 
-    public String toString() {
-        return versionNumberSegments.stream().collect(Collectors.joining(".")) + (isSnapshot ? SNAPSHOT_NOTATION : "");
-    }
-
     public static boolean isValid(String versionString) {
 
         if (versionString == null) {
@@ -57,20 +53,6 @@ public final class VersionNumber implements Comparable<VersionNumber> {
     public VersionNumber shorten(int newLength) {
 
         return new VersionNumber(versionNumberSegments.subList(0, newLength), isSnapshot);
-    }
-
-    public int compareTo(VersionNumber other) {
-
-        List<Integer> versionComparison = new ArrayList<>();
-        int segmentsToCompare = Math.min(this.versionNumberSegments.size(), other.versionNumberSegments.size());
-        for (int i = 0; i < segmentsToCompare; i++) {
-            Integer me = Integer.parseInt(this.versionNumberSegments.get(i));
-            Integer that = Integer.parseInt(other.versionNumberSegments.get(i));
-            versionComparison.add(me.compareTo(that));
-        }
-        versionComparison.add(Boolean.compare(this.isSnapshot, other.isSnapshot));
-        versionComparison.add(Integer.compare(this.versionNumberSegments.size(), other.versionNumberSegments.size()));
-        return versionComparison.stream().filter((it) -> it != 0).findFirst().orElse(0);
     }
 
     public boolean canBeUsedWhenDeterminingReleaseVersion(VersionNumber other) {
@@ -128,5 +110,25 @@ public final class VersionNumber implements Comparable<VersionNumber> {
     public boolean isSnapshot() {
 
         return isSnapshot;
+    }
+
+    @Override
+    public int compareTo(VersionNumber other) {
+
+        List<Integer> versionComparison = new ArrayList<>();
+        int segmentsToCompare = Math.min(this.versionNumberSegments.size(), other.versionNumberSegments.size());
+        for (int i = 0; i < segmentsToCompare; i++) {
+            Integer me = Integer.parseInt(this.versionNumberSegments.get(i));
+            Integer that = Integer.parseInt(other.versionNumberSegments.get(i));
+            versionComparison.add(me.compareTo(that));
+        }
+        versionComparison.add(Boolean.compare(this.isSnapshot, other.isSnapshot));
+        versionComparison.add(Integer.compare(this.versionNumberSegments.size(), other.versionNumberSegments.size()));
+        return versionComparison.stream().filter(it -> it != 0).findFirst().orElse(0);
+    }
+
+    @Override
+    public String toString() {
+        return versionNumberSegments.stream().collect(Collectors.joining(".")) + (isSnapshot ? SNAPSHOT_NOTATION : "");
     }
 }
