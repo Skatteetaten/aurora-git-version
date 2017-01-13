@@ -51,6 +51,7 @@ public final class Main {
         List<String> branchesToStipulateReleaseVersionsFor = Arrays.stream(suggestReleasesCsv.
             split(","))
             .map(String::trim)
+            .filter(s -> !s.isEmpty())
             .collect(Collectors.toList());
         String versionHint = cmd.getOptionValue("version-hint", "");
         if (!branchesToStipulateReleaseVersionsFor.isEmpty()) {
