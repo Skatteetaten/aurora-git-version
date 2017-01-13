@@ -93,7 +93,15 @@ public class GitVersion {
     protected Optional<String> getVersionTagOnCommit(ObjectId commit) {
 
         return repository.getTags().entrySet().stream()
-            .filter(entry -> entry.getValue().getObjectId().equals(commit))
+            .filter(entry -> {
+                ObjectId peeledObjectId = entry.getValue().getPeeledObjectId();
+                // If the peeledObjectId is not null, we are dealing with an annotated tag. The peeledObjectId will
+                // then reference the commit that has been tagged
+                ObjectId commitId = peeledObjectId != null
+                    ? peeledObjectId.toObjectId()
+                    : entry.getValue().getObjectId();
+                return commitId.equals(commit);
+            })
             .filter(entry -> entry.getKey().startsWith(options.versionPrefix))
             .map(Map.Entry::getKey)
             .findFirst();
