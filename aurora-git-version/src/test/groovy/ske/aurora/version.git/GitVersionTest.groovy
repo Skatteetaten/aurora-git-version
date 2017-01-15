@@ -1,13 +1,14 @@
 package ske.aurora.version.git
 
+import static ske.aurora.version.git.GitVersion.VersionSource.BRANCH
+import static ske.aurora.version.git.GitVersion.VersionSource.TAG
+
 import org.apache.tools.ant.taskdefs.Expand
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
+
 import spock.lang.Specification
 import spock.lang.Unroll
-
-import static ske.aurora.version.git.GitVersion.VersionSource.BRANCH
-import static ske.aurora.version.git.GitVersion.VersionSource.TAG
 
 class GitVersionTest extends Specification {
 
@@ -64,5 +65,41 @@ class GitVersionTest extends Specification {
       "develop"                                                  | "develop-SNAPSHOT"
       "bugfix/AOC-8-dialog-for-a-bekrefte-endring-av-tagversjon" |
           "bugfix_AOC_8_dialog_for_a_bekrefte_endring_av_tagversjon-SNAPSHOT"
+  }
+
+  def "Get most recent tag with no tags"() {
+
+    expect:
+      GitVersion.getMostRecentTag([]) == Optional.empty()
+  }
+
+  def "Get most recent tag"() {
+
+    given:
+      def tags = [
+          "vfeature-SAF-2190-jenkins-bytte-versjon-av-aurora-cd-1-DEV",
+          "vfeature-SAF-2190-jenkins-bytte-versjon-av-aurora-cd-10-DEV",
+          "vfeature-SAF-2190-jenkins-bytte-versjon-av-aurora-cd-11-DEV",
+          "vfeature-SAF-2190-jenkins-bytte-versjon-av-aurora-cd-12-DEV",
+          "vfeature-SAF-2190-jenkins-bytte-versjon-av-aurora-cd-13-DEV",
+          "vfeature-SAF-2190-jenkins-bytte-versjon-av-aurora-cd-14-DEV",
+          "vfeature-SAF-2190-jenkins-bytte-versjon-av-aurora-cd-15-DEV",
+          "vfeature-SAF-2190-jenkins-bytte-versjon-av-aurora-cd-16-DEV",
+          "vfeature-SAF-2190-jenkins-bytte-versjon-av-aurora-cd-17-DEV",
+          "vfeature-SAF-2190-jenkins-bytte-versjon-av-aurora-cd-18-DEV",
+          "vfeature-SAF-2190-jenkins-bytte-versjon-av-aurora-cd-19-DEV",
+          "vfeature-SAF-2190-jenkins-bytte-versjon-av-aurora-cd-2-DEV",
+          "vfeature-SAF-2190-jenkins-bytte-versjon-av-aurora-cd-3-DEV",
+          "vfeature-SAF-2190-jenkins-bytte-versjon-av-aurora-cd-4-DEV",
+          "vfeature-SAF-2190-jenkins-bytte-versjon-av-aurora-cd-5-DEV",
+          "vfeature-SAF-2190-jenkins-bytte-versjon-av-aurora-cd-6-DEV",
+          "vfeature-SAF-2190-jenkins-bytte-versjon-av-aurora-cd-7-DEV",
+          "vfeature-SAF-2190-jenkins-bytte-versjon-av-aurora-cd-8-DEV",
+          "vfeature-SAF-2190-jenkins-bytte-versjon-av-aurora-cd-9-DEV",
+          "vfeature/SAF-2190-jenkins-bytte-versjon-av-aurora-cd-1-DEV"
+      ]
+
+    expect:
+      GitVersion.getMostRecentTag(tags).orElse("") == "vfeature-SAF-2190-jenkins-bytte-versjon-av-aurora-cd-19-DEV"
   }
 }

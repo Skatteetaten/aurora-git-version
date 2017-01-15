@@ -2,10 +2,14 @@ package ske.aurora.version.git;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
@@ -92,19 +96,55 @@ public class GitVersion {
 
     protected Optional<String> getVersionTagOnCommit(ObjectId commit) {
 
-        return repository.getTags().entrySet().stream()
-            .filter(entry -> {
-                ObjectId peeledObjectId = entry.getValue().getPeeledObjectId();
-                // If the peeledObjectId is not null, we are dealing with an annotated tag. The peeledObjectId will
-                // then reference the commit that has been tagged
-                ObjectId commitId = peeledObjectId != null
-                    ? peeledObjectId.toObjectId()
-                    : entry.getValue().getObjectId();
-                return commitId.equals(commit);
-            })
-            .filter(entry -> entry.getKey().startsWith(options.versionPrefix))
-            .map(Map.Entry::getKey)
-            .findFirst();
+        List<String> tags = getVersionTagsFromCommit(commit);
+        return getMostRecentTag(tags);
+    }
+
+    protected static Optional<String> getMostRecentTag(List<String> tags) {
+
+        tags.sort((s1, s2) -> {
+            int lengthComp = Integer.compare(s1.length(), s2.length());
+            if (lengthComp != 0) {
+                // If the tag names are not the same length, the shortest ones should come first
+                return lengthComp;
+            }
+            // If the tag names are the same length, order them by their natural order
+            return s1.compareTo(s2);
+        });
+        // Now, the tags list will be either empty or ordered by their natural order with the shortest names first.
+        // We can now get the last tag, assuming this is the most recent tag. For instance, in a list of tags like
+        // the following; dev-1, dev-10, dev-11, dev-2, dev-3..., we will get dev-11 as the most recent tag.
+        return tags.isEmpty() ? Optional.empty() : Optional.of(tags.get(tags.size() - 1));
+    }
+
+    protected List<String> getVersionTagsFromCommit(ObjectId commit) {
+
+        List<String> tags = new ArrayList<>();
+        try (Git git = new Git(repository)) {
+            List<Ref> call = git.tagList().call();
+            for (Ref ref : call) {
+                ObjectId objectId = ref.getObjectId();
+                Ref peeledRef = repository.peel(ref);
+                if (peeledRef.getPeeledObjectId() != null) {
+                    objectId = peeledRef.getPeeledObjectId();
+                }
+                if (!objectId.equals(commit)) {
+                    continue;
+                }
+                String tagName = tagNameFromRef(ref);
+                if (tagName.startsWith(options.versionPrefix)) {
+                    tags.add(tagName);
+                }
+            }
+        } catch (GitAPIException e) {
+            throw new GitException("A git error occurred while listing tags", e);
+        }
+        return tags;
+    }
+
+    private String tagNameFromRef(Ref ref) {
+        String tagNamePrefix = "refs/tags/";
+        return ref.getName().replaceFirst(tagNamePrefix, "");
     }
 
     protected Optional<String> getCurrentBranchName() throws IOException {
