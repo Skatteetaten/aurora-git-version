@@ -1,12 +1,13 @@
 package ske.aurora.version.git
 
-import static ske.aurora.version.git.GitVersion.VersionSource.BRANCH
-import static ske.aurora.version.git.GitVersion.VersionSource.TAG
+import static no.skatteetaten.aurora.version.git.GitVersion.VersionSource.BRANCH
+import static no.skatteetaten.aurora.version.git.GitVersion.VersionSource.TAG
 
 import org.apache.tools.ant.taskdefs.Expand
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 
+import no.skatteetaten.aurora.version.git.GitVersion
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -24,7 +25,6 @@ class GitVersionTest extends Specification {
         overwrite: "true")
     repoFolder = "$unzip.dest/gitrepos"
   }
-
 
   @Unroll("#repo")
   def "Produces version from branch or tag name"() {
