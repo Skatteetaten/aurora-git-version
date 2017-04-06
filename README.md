@@ -1,6 +1,5 @@
-# aurora-git-version
 
-## Introduction
+# Introduction
 
 aurora-git-version is a library for determining a version (typically an application or library version) from
 information found in Git.
@@ -31,7 +30,3 @@ The library does not tag and push the suggested version, so to avoid suggesting 
 future commit you are responsible yourself (or by the support of plugins) to tag the current commit appropriately and
 push the new tag.
 
-
-## Example usage
-
-TODO
