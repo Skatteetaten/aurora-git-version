@@ -6,10 +6,12 @@
   <parent>
     <groupId>no.skatteetaten.aurora</groupId>
     <artifactId>aurora-git-version-parent</artifactId>
-    <version>0-SNAPSHOT</version>
+    <version>1.0.1</version>
   </parent>
   <artifactId>aurora-git-version</artifactId>
   <packaging>jar</packaging>
+
+  <description>Library to suggest version from scm information</description>
 
   <properties>
     <sonar.tests>src/test/groovy</sonar.tests>
