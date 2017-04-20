@@ -11,6 +11,8 @@
   <artifactId>aurora-git-version-cli</artifactId>
   <packaging>jar</packaging>
 
+  <name>aurora-git-version-cli</name>
+  <description>cli  for Library to suggest version from scm information</description>
   <build>
     <plugins>
       <plugin>

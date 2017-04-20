@@ -11,6 +11,8 @@
 
   <url>https://github.com/skatteetaten/aurora-git-version</url>
 
+  <name>aurora-git-version-parent</name>
+  <description>Parent pom for Library to suggest version from scm information</description>
 
   <scm>
     <url>https://github.com/skatteetaten/aurora-git-version</url>
