@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 /**
  * This class is a Java implementation of Tommy Bø's original implementation in Groovy that could be found in the
  * aurora-cd maven plugin. It has been reimplemented in Java without changing any of the core logic.
+ *
+ * http://semver.org/
  */
 public class ReleaseVersionEvaluator {
 
@@ -24,9 +26,15 @@ public class ReleaseVersionEvaluator {
             .collect(Collectors.toList());
         if (orderedListOfEligibleVersions.isEmpty()) {
             return currentVersion.unlockVersion();
+        } else if (currentVersion.getVersionNumberSegments().size() == 1) {
+            return orderedListOfEligibleVersions
+                .get(orderedListOfEligibleVersions.size() - 1).adaptTo(currentVersion)
+                .incrementMinorSegment();
         } else {
-            return orderedListOfEligibleVersions.get(orderedListOfEligibleVersions.size() - 1).adaptTo(currentVersion)
-                .incrementLastSegment();
+            return orderedListOfEligibleVersions
+                .get(orderedListOfEligibleVersions.size() - 1).adaptTo(currentVersion)
+                .incrementPatchSegment();
         }
     }
 }
+

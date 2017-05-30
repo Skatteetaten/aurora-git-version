@@ -25,6 +25,7 @@ class GitVersionTest extends Specification {
     repoFolder = "$unzip.dest/gitrepos"
   }
 
+
   @Unroll("#repo")
   def "Produces version from branch or tag name"() {
 

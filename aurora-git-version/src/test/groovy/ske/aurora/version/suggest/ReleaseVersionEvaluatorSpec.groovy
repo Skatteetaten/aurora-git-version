@@ -8,7 +8,7 @@ class ReleaseVersionEvaluatorSpec extends Specification {
     given:
       def existingVersions = ["1.2.1", "1.2.2", "1.3.1", "1.3.2", "1.3.3"]
     when:
-      def suggestedReleaseVersion = new ReleaseVersionEvaluator("1-SNAPSHOT").
+      def suggestedReleaseVersion = new ReleaseVersionEvaluator("1.3-SNAPSHOT").
           suggestNextReleaseVersionFrom(existingVersions);
     then:
       suggestedReleaseVersion.toString() == "1.3.4"
@@ -34,6 +34,28 @@ class ReleaseVersionEvaluatorSpec extends Specification {
       suggestedReleaseVersion.toString() == "2.3.0"
   }
 
+  def "sugested version number is X.X.X when there are existing version numbers and provided hint is X.X-SNAPSHOT"(){
+    given:
+      def existingVersions = ["1.2.1", "1.2.2", "1.3.1", "2.3.0"]
+    when:
+      def suggestedReleaseVersion = new ReleaseVersionEvaluator("2.3-SNAPSHOT").
+          suggestNextReleaseVersionFrom(existingVersions);
+    then:
+      suggestedReleaseVersion.toString() == "2.3.1"
+  }
+
+  def "suggested version number is X.X.0 when there are existing version numbers and provided hint is X-SNAPSHOT"(){
+    given:
+      def existingVersions = ["1.2.1", "1.2.2", "1.3.1", "2.3.0"]
+    when:
+      def suggestedReleaseVersion = new ReleaseVersionEvaluator("2-SNAPSHOT").
+          suggestNextReleaseVersionFrom(existingVersions);
+    then:
+      suggestedReleaseVersion.toString() == "2.4.0"
+
+  }
+
+
   @Unroll
   def "Suggested version number is #expectedSuggestedReleaseVersion when existing versions are #existingVersions and current version is #currentVersion"() {
     when:
@@ -56,7 +78,7 @@ class ReleaseVersionEvaluatorSpec extends Specification {
     given:
       def existingVersions = ["1.1.0", "2.1.0", "2.1.1", "2.2.0", "3.1.0"]
     when:
-      def suggestedReleaseVersion = new ReleaseVersionEvaluator("2-SNAPSHOT").
+      def suggestedReleaseVersion = new ReleaseVersionEvaluator("2.2-SNAPSHOT").
           suggestNextReleaseVersionFrom(existingVersions);
     then:
       suggestedReleaseVersion.toString() == "2.2.1"
@@ -76,7 +98,7 @@ class ReleaseVersionEvaluatorSpec extends Specification {
     given:
       def existingVersions = ["1.2.0", "1.3.0", "1.2.1", "1.5.6", "1.6.2", "1.4.5"]
     when:
-      def suggestedReleaseVersion = new ReleaseVersionEvaluator("1-SNAPSHOT").
+      def suggestedReleaseVersion = new ReleaseVersionEvaluator("1.6-SNAPSHOT").
           suggestNextReleaseVersionFrom(existingVersions);
     then:
       suggestedReleaseVersion.toString() == "1.6.3"

@@ -118,7 +118,7 @@ class VersionNumberSpec extends Specification {
     given:
       def version = VersionNumber.parse("3.2.1");
     when:
-      def increasedVersion = version.incrementLastSegment();
+      def increasedVersion = version.incrementPatchSegment();
     then:
       increasedVersion.toString() == "3.2.2";
   }
@@ -127,7 +127,7 @@ class VersionNumberSpec extends Specification {
     given:
       def version = VersionNumber.parse("3.2-SNAPSHOT");
     when:
-      def increasedVersion = version.incrementLastSegment();
+      def increasedVersion = version.incrementPatchSegment();
     then:
       increasedVersion.toString() == "3.3-SNAPSHOT";
   }
