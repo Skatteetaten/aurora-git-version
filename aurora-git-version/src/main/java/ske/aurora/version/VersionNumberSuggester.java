@@ -64,7 +64,6 @@ public final class VersionNumberSuggester {
     }
 
     private String getInferredVersion() {
-
         List<String> versions = getAllVersionsFromTags();
         VersionNumber inferredVersion =
             new ReleaseVersionEvaluator(options.getVersionHint()).suggestNextReleaseVersionFrom(versions);
