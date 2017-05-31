@@ -1,9 +1,10 @@
 #!/usr/bin/env groovy
 
-def scriptVersion = 'v2.0.0'
 def jenkinsfile
-fileLoader.withGit('https://git.sits.no/git/scm/ao/aurora-pipeline-scripts.git', scriptVersion) {
-   jenkinsfile = fileLoader.load('templates/bibliotek')
+def version='v2.10.1'
+fileLoader.withGit('https://git.aurora.skead.no/scm/ao/aurora-pipeline-scripts.git', version) {
+   jenkinsfile = fileLoader.load('templates/leveransepakke')
 }
 
-jenkinsfile.run(scriptVersion, 'Maven 3', 'aurora-bitbucket')
+def overrides = [piTests: false, library: true]
+jenkinsfile.run(version, overrides)
