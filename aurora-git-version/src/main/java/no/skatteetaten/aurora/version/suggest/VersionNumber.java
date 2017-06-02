@@ -93,12 +93,21 @@ public final class VersionNumber implements Comparable<VersionNumber> {
         return new VersionNumber(adaptation, false);
     }
 
-    public VersionNumber incrementLastSegment() {
+    public VersionNumber incrementPatchSegment() {
 
         List<String> newSegments = new ArrayList<>(versionNumberSegments.subList(0, versionNumberSegments.size() - 1));
         Integer lastElement = Integer.parseInt(versionNumberSegments.get(versionNumberSegments.size() - 1));
         lastElement += 1;
         newSegments.add(lastElement.toString());
+        return new VersionNumber(newSegments, isSnapshot);
+    }
+
+    public VersionNumber incrementMinorSegment() {
+        List<String> newSegments = new ArrayList<>(versionNumberSegments);
+        Integer minorElement = Integer.parseInt(versionNumberSegments.get(versionNumberSegments.size() - 2));
+        minorElement += 1;
+        newSegments.set(1, minorElement.toString());
+        newSegments.set(2, "0");
         return new VersionNumber(newSegments, isSnapshot);
     }
 

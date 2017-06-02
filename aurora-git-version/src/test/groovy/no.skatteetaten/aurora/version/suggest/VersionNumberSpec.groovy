@@ -1,4 +1,4 @@
-package ske.aurora.version.suggest
+package no.skatteetaten.aurora.version.suggest
 
 import spock.lang.Specification
 

@@ -1,4 +1,4 @@
-package ske.aurora.version.git;
+package no.skatteetaten.aurora.version;
 
 import java.util.Arrays;
 import java.util.List;
@@ -11,8 +11,6 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
-import ske.aurora.version.SuggesterOptions;
-import ske.aurora.version.VersionNumberSuggester;
 
 public final class Main {
 
