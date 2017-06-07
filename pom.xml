@@ -78,11 +78,6 @@
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-scm-plugin</artifactId>
-          <version>1.9.5</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
           <version>3.0.0</version>
         </plugin>
@@ -94,7 +89,7 @@
         <plugin>
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
-          <version>0.7.7.201606060606</version>
+          <version>0.7.9</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -126,12 +121,6 @@
             </goals>
           </execution>
         </executions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-scm-plugin</artifactId>
-        <configuration>
-          <tag>v${project.version}</tag>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.codehaus.gmavenplus</groupId>
@@ -181,12 +170,12 @@
           <dependency>
             <groupId>com.puppycrawl.tools</groupId>
             <artifactId>checkstyle</artifactId>
-            <version>7.4</version>
+            <version>7.5</version>
           </dependency>
           <dependency>
             <groupId>no.skatteetaten.aurora.checkstyle</groupId>
             <artifactId>checkstyle-config</artifactId>
-            <version>0.6</version>
+            <version>0.8</version>
           </dependency>
         </dependencies>
       </plugin>
