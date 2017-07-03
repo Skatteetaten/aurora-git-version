@@ -20,7 +20,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>no.skatteetaten.aurora.version.git.Main</mainClass>
+              <mainClass>no.skatteetaten.aurora.version.Main</mainClass>
             </manifest>
           </archive>
           <descriptorRefs>
