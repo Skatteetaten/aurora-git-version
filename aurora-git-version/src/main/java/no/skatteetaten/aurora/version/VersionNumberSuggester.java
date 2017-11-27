@@ -71,6 +71,8 @@ public final class VersionNumberSuggester {
         o.setFallbackBranchNameEnvName(options.getFallbackBranchNameEnvName());
         o.setFallbackToBranchNameEnv(options.isFallbackToBranchNameEnv());
         o.setVersionPrefix(options.getVersionPrefix());
+        o.setBranchesToUseTagsAsVersionsFor(options.getBranchesToUseTagsAsVersionsFor());
+        o.setTryDeterminingCurrentVersionFromTagName(options.isTryDeterminingCurrentVersionFromTagName());
         return o;
     }
 
