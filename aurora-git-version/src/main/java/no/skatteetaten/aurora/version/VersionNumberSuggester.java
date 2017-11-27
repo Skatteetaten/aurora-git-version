@@ -1,15 +1,9 @@
 package no.skatteetaten.aurora.version;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
-
-import no.skatteetaten.aurora.version.git.GitTools;
+import no.skatteetaten.aurora.version.git.GitRepo;
 import no.skatteetaten.aurora.version.git.GitVersion;
 import no.skatteetaten.aurora.version.suggest.ReleaseVersionEvaluator;
 import no.skatteetaten.aurora.version.suggest.VersionNumber;
@@ -20,42 +14,43 @@ import no.skatteetaten.aurora.version.suggest.VersionNumber;
  */
 public final class VersionNumberSuggester {
 
-    private final Repository repository;
+    private final GitRepo repository;
 
     private final SuggesterOptions options;
 
-    public static String suggestVersion() throws IOException {
+    public static String suggestVersion() {
         return suggestVersion(new SuggesterOptions());
     }
 
-    public static String suggestVersion(SuggesterOptions options) throws IOException {
-
-        Repository repository = getGitRepository(options.getGitRepoPath());
-        return new VersionNumberSuggester(repository, options).suggestVersionInternal();
+    public static String suggestVersion(SuggesterOptions options) {
+        return new VersionNumberSuggester(GitRepo.fromDir(options.getGitRepoPath()), options).suggestVersionInternal();
     }
 
-    private VersionNumberSuggester(Repository repository, SuggesterOptions options) {
+    private VersionNumberSuggester(GitRepo repository, SuggesterOptions options) {
         this.repository = repository;
         this.options = options;
     }
 
-    private String suggestVersionInternal() throws IOException {
+    private String suggestVersionInternal() {
 
-        GitVersion.Version versionFromGit = GitVersion.determineVersion(repository, createGitVersionOptions(options));
+        GitVersion.Version versionFromGit = new GitVersion(repository, createGitVersionOptions(options))
+            .determineVersion();
+
         if (shouldInferReleaseVersion(versionFromGit)) {
             return getInferredVersion();
         }
         return versionFromGit.getVersion();
     }
 
-    private boolean shouldInferReleaseVersion(GitVersion.Version versionFromGit) throws IOException {
+    private boolean shouldInferReleaseVersion(GitVersion.Version versionFromGit) {
 
         if (versionFromGit.isFromTag()) {
             return false;
         }
 
-        Optional<String> currentBranchOption = GitTools
-            .getBranchName(repository, options.isFallbackToBranchNameEnv(), options.getFallbackBranchNameEnvName());
+        Optional<String> currentBranchOption = repository.getBranchName(
+            options.isFallbackToBranchNameEnv(),
+            options.getFallbackBranchNameEnvName());
 
         String currentBranch = currentBranchOption
             .orElseThrow(() -> new IllegalStateException("Unable to determine name of current branch"));
@@ -64,9 +59,10 @@ public final class VersionNumberSuggester {
     }
 
     private String getInferredVersion() {
-        List<String> versions = getAllVersionsFromTags();
-        VersionNumber inferredVersion =
-            new ReleaseVersionEvaluator(options.getVersionHint()).suggestNextReleaseVersionFrom(versions);
+        List<String> versions = repository.getAllVersionsFromTags(options.getVersionPrefix());
+        VersionNumber inferredVersion = new ReleaseVersionEvaluator(options.getVersionHint())
+            .suggestNextReleaseVersionFrom(versions);
+
         return inferredVersion.toString();
     }
 
@@ -78,19 +74,4 @@ public final class VersionNumberSuggester {
         return o;
     }
 
-    private List<String> getAllVersionsFromTags() {
-        String versionPrefix = options.getVersionPrefix();
-        return repository.getTags().entrySet().stream()
-            .filter(e -> e.getKey().startsWith(versionPrefix))
-            .map(e -> e.getKey().replaceFirst(versionPrefix, ""))
-            .collect(Collectors.toList());
-    }
-
-    private static Repository getGitRepository(String gitRepoPath) throws IOException {
-        FileRepositoryBuilder builder = new FileRepositoryBuilder();
-        return builder.setGitDir(new File(gitRepoPath, ".git"))
-            .readEnvironment()
-            .setMustExist(true)
-            .build();
-    }
 }
