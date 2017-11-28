@@ -1,5 +1,7 @@
 package no.skatteetaten.aurora.version.git;
 
+import static java.util.Collections.emptyList;
+
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
@@ -7,8 +9,6 @@ import java.util.Optional;
 import org.eclipse.jgit.lib.ObjectId;
 
 import no.skatteetaten.aurora.version.utils.Assert;
-
-import static java.util.Collections.emptyList;
 
 public class GitVersion {
 
@@ -55,8 +55,13 @@ public class GitVersion {
 
         ObjectId head = repository.resolve("HEAD");
 
-        boolean shouldDetermineVersionFromTag = currentBranchName.map(options::shouldDetermineVersionFromTag).orElse(false);
-        Optional<String> versionTagOnHead = shouldDetermineVersionFromTag ? getVersionTagOnCommit(head) : Optional.empty();
+        boolean shouldDetermineVersionFromTag = currentBranchName
+            .map(options::shouldDetermineVersionFromTag)
+            .orElse(false);
+
+        Optional<String> versionTagOnHead = shouldDetermineVersionFromTag
+            ? getVersionTagOnCommit(head)
+            : Optional.empty();
 
         return versionTagOnHead
             .map(this::getVersionFromVersionTag)
@@ -140,8 +145,8 @@ public class GitVersion {
         private String fallbackBranchNameEnvName = "BRANCH_NAME";
 
         /**
-         * Whether or not we should use try to use existing tags on the current commit for determining the current version.
-         * Setting this to <code>false</code> will always yield a snapshot version.
+         * Whether or not we should use try to use existing tags on the current commit for determining the current
+         * version. Setting this to <code>false</code> will always yield a snapshot version.
          */
         private boolean tryDeterminingCurrentVersionFromTagName = true;
 
