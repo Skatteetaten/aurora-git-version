@@ -1,17 +1,12 @@
 package no.skatteetaten.aurora.version.git;
 
+import static java.util.Collections.emptyList;
+
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
 import no.skatteetaten.aurora.version.utils.Assert;
 
@@ -19,9 +14,9 @@ public class GitVersion {
 
     private final Options options;
 
-    private final Repository repository;
+    private final GitRepo repository;
 
-    public static Version determineVersion(File gitDir) throws IOException {
+    public static Version determineVersion(File gitDir) {
         return determineVersion(gitDir, new Options());
     }
 
@@ -42,65 +37,61 @@ public class GitVersion {
      * with <code>options.versionFromBranchNamePostfix</code> as the version name. The first branch with the commit in
      * it will be used.</li>
      * </ol>
-     *
-     * @param gitDir
-     * @param options
-     * @return
-     * @throws IOException
+     * The default behaviour can be modified with the <code>options</code> object.
      */
-    public static Version determineVersion(File gitDir, Options options) throws IOException {
-        FileRepositoryBuilder builder = new FileRepositoryBuilder();
-        Repository repository = builder.setGitDir(new File(gitDir, ".git"))
-            .readEnvironment() // scan environment GIT_* variables
-            .setMustExist(true)
-            .build();
-        return determineVersion(repository, options);
+    public static Version determineVersion(File gitDir, Options options) {
+        return new GitVersion(GitRepo.fromDir(gitDir), options).determineVersion();
     }
 
-    public static Version determineVersion(Repository repository, Options options) throws IOException {
-        return new GitVersion(repository, options).determineVersion();
-    }
-
-    protected GitVersion(Repository repository, Options options) throws IOException {
-        Assert.notNull(repository, "Repository cannot be null");
+    public GitVersion(GitRepo gitRepo, Options options) {
+        Assert.notNull(gitRepo, "Repository cannot be null");
         Assert.notNull(options, "SuggesterOptions cannot be null");
-        this.repository = repository;
+        this.repository = gitRepo;
         this.options = options;
     }
 
-    protected Version determineVersion() throws IOException {
+    public Version determineVersion() {
         Optional<String> currentBranchName = getCurrentBranchName();
 
         ObjectId head = repository.resolve("HEAD");
-        Optional<String> versionTagOnHead = getVersionTagOnCommit(head);
+
+        boolean shouldDetermineVersionFromTag = currentBranchName
+            .map(options::shouldDetermineVersionFromTag)
+            .orElse(false);
+
+        Optional<String> versionTagOnHead = shouldDetermineVersionFromTag
+            ? getVersionTagOnCommit(head)
+            : Optional.empty();
 
         return versionTagOnHead
             .map(this::getVersionFromVersionTag)
             .orElseGet(() -> currentBranchName
-                .map(this::getVersionFromBranchName)
+                .map(GitVersion::getVersionFromBranchName)
                 .orElse(new Version(options.fallbackVersion, VersionSource.FALLBACK)));
     }
 
     protected Version getVersionFromVersionTag(String versionTag) {
-
         String version = versionTag.replaceFirst(options.versionPrefix, "");
         return new Version(version, VersionSource.TAG);
     }
 
-    protected Version getVersionFromBranchName(String currentBranchName) {
+    protected Optional<String> getVersionTagOnCommit(ObjectId head) {
+        return getMostRecentTag(repository.getVersionTagsFromCommit(head, options.versionPrefix));
+    }
 
+    private Optional<String> getCurrentBranchName() {
+        return repository.getBranchName(
+            options.fallbackToBranchNameEnv,
+            options.fallbackBranchNameEnvName);
+    }
+
+    public static Version getVersionFromBranchName(String currentBranchName) {
         String versionSafeName = currentBranchName.replaceAll("[\\/-]", "_");
-        String version = String.format("%s%s", versionSafeName, options.versionFromBranchNamePostfix);
+        String version = String.format("%s-SNAPSHOT", versionSafeName);
         return new Version(version, VersionSource.BRANCH);
     }
 
-    protected Optional<String> getVersionTagOnCommit(ObjectId commit) {
-
-        List<String> tags = getVersionTagsFromCommit(commit);
-        return getMostRecentTag(tags);
-    }
-
-    protected static Optional<String> getMostRecentTag(List<String> tags) {
+    public static Optional<String> getMostRecentTag(List<String> tags) {
 
         tags.sort((s1, s2) -> {
             int lengthComp = Integer.compare(s1.length(), s2.length());
@@ -115,42 +106,6 @@ public class GitVersion {
         // We can now get the last tag, assuming this is the most recent tag. For instance, in a list of tags like
         // the following; dev-1, dev-10, dev-11, dev-2, dev-3..., we will get dev-11 as the most recent tag.
         return tags.isEmpty() ? Optional.empty() : Optional.of(tags.get(tags.size() - 1));
-    }
-
-    protected List<String> getVersionTagsFromCommit(ObjectId commit) {
-
-        List<String> tags = new ArrayList<>();
-        try (Git git = new Git(repository)) {
-            List<Ref> call = git.tagList().call();
-            for (Ref ref : call) {
-                ObjectId objectId = ref.getObjectId();
-                Ref peeledRef = repository.peel(ref);
-                if (peeledRef.getPeeledObjectId() != null) {
-                    objectId = peeledRef.getPeeledObjectId();
-                }
-                if (!objectId.equals(commit)) {
-                    continue;
-                }
-                String tagName = tagNameFromRef(ref);
-                if (tagName.startsWith(options.versionPrefix)) {
-                    tags.add(tagName);
-                }
-            }
-        } catch (GitAPIException e) {
-            throw new GitException("A git error occurred while listing tags", e);
-        }
-        return tags;
-    }
-
-    private String tagNameFromRef(Ref ref) {
-        String tagNamePrefix = "refs/tags/";
-        return ref.getName().replaceFirst(tagNamePrefix, "");
-    }
-
-    protected Optional<String> getCurrentBranchName() throws IOException {
-
-        return GitTools
-            .getBranchName(this.repository, options.fallbackToBranchNameEnv, options.fallbackBranchNameEnvName);
     }
 
     public enum VersionSource {
@@ -188,7 +143,20 @@ public class GitVersion {
         private boolean fallbackToBranchNameEnv = true;
         private String fallbackVersion = "unknown";
         private String fallbackBranchNameEnvName = "BRANCH_NAME";
-        private String versionFromBranchNamePostfix = "-SNAPSHOT";
+
+        /**
+         * Whether or not we should use try to use existing tags on the current commit for determining the current
+         * version. Setting this to <code>false</code> will always yield a snapshot version.
+         */
+        private boolean tryDeterminingCurrentVersionFromTagName = true;
+
+        /**
+         * A list of branch names that should use the tags of the current commit to determine version. Branches not in
+         * this list will always become snapshot versions. An empty list will use all branches. Use
+         * <code>tryDeterminingCurrentVersionFromTagName</code> to disable this feature.
+         */
+        private List<String> branchesToUseTagsAsVersionsFor = emptyList();
+
 
         public String getVersionPrefix() {
             return versionPrefix;
@@ -222,12 +190,32 @@ public class GitVersion {
             this.fallbackBranchNameEnvName = fallbackBranchNameEnvName;
         }
 
-        public String getVersionFromBranchNamePostfix() {
-            return versionFromBranchNamePostfix;
+        public boolean isTryDeterminingCurrentVersionFromTagName() {
+            return tryDeterminingCurrentVersionFromTagName;
         }
 
-        public void setVersionFromBranchNamePostfix(String versionFromBranchNamePostfix) {
-            this.versionFromBranchNamePostfix = versionFromBranchNamePostfix;
+        public void setTryDeterminingCurrentVersionFromTagName(boolean tryDeterminingCurrentVersionFromTagName) {
+            this.tryDeterminingCurrentVersionFromTagName = tryDeterminingCurrentVersionFromTagName;
+        }
+
+        public List<String> getBranchesToUseTagsAsVersionsFor() {
+            return branchesToUseTagsAsVersionsFor;
+        }
+
+        public void setBranchesToUseTagsAsVersionsFor(List<String> branchesToUseTagsAsVersionsFor) {
+            this.branchesToUseTagsAsVersionsFor = branchesToUseTagsAsVersionsFor;
+        }
+
+        public boolean shouldDetermineVersionFromTag(String currentBranchName) {
+
+            if (!tryDeterminingCurrentVersionFromTagName) {
+                return false;
+            }
+            // Empty list means all branches
+            if (branchesToUseTagsAsVersionsFor.isEmpty()) {
+                return true;
+            }
+            return branchesToUseTagsAsVersionsFor.contains(currentBranchName);
         }
     }
 }
