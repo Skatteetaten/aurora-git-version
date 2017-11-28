@@ -8,6 +8,8 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import no.skatteetaten.aurora.version.utils.Assert;
 
+import static java.util.Collections.emptyList;
+
 public class GitVersion {
 
     private final Options options;
@@ -35,6 +37,7 @@ public class GitVersion {
      * with <code>options.versionFromBranchNamePostfix</code> as the version name. The first branch with the commit in
      * it will be used.</li>
      * </ol>
+     * The default behaviour can be modified with the <code>options</code> object.
      */
     public static Version determineVersion(File gitDir, Options options) {
         return new GitVersion(GitRepo.fromDir(gitDir), options).determineVersion();
@@ -51,7 +54,9 @@ public class GitVersion {
         Optional<String> currentBranchName = getCurrentBranchName();
 
         ObjectId head = repository.resolve("HEAD");
-        Optional<String> versionTagOnHead = getVersionTagOnCommit(head);
+
+        boolean shouldDetermineVersionFromTag = currentBranchName.map(options::shouldDetermineVersionFromTag).orElse(false);
+        Optional<String> versionTagOnHead = shouldDetermineVersionFromTag ? getVersionTagOnCommit(head) : Optional.empty();
 
         return versionTagOnHead
             .map(this::getVersionFromVersionTag)
@@ -134,6 +139,20 @@ public class GitVersion {
         private String fallbackVersion = "unknown";
         private String fallbackBranchNameEnvName = "BRANCH_NAME";
 
+        /**
+         * Whether or not we should use try to use existing tags on the current commit for determining the current version.
+         * Setting this to <code>false</code> will always yield a snapshot version.
+         */
+        private boolean tryDeterminingCurrentVersionFromTagName = true;
+
+        /**
+         * A list of branch names that should use the tags of the current commit to determine version. Branches not in
+         * this list will always become snapshot versions. An empty list will use all branches. Use
+         * <code>tryDeterminingCurrentVersionFromTagName</code> to disable this feature.
+         */
+        private List<String> branchesToUseTagsAsVersionsFor = emptyList();
+
+
         public String getVersionPrefix() {
             return versionPrefix;
         }
@@ -166,5 +185,32 @@ public class GitVersion {
             this.fallbackBranchNameEnvName = fallbackBranchNameEnvName;
         }
 
+        public boolean isTryDeterminingCurrentVersionFromTagName() {
+            return tryDeterminingCurrentVersionFromTagName;
+        }
+
+        public void setTryDeterminingCurrentVersionFromTagName(boolean tryDeterminingCurrentVersionFromTagName) {
+            this.tryDeterminingCurrentVersionFromTagName = tryDeterminingCurrentVersionFromTagName;
+        }
+
+        public List<String> getBranchesToUseTagsAsVersionsFor() {
+            return branchesToUseTagsAsVersionsFor;
+        }
+
+        public void setBranchesToUseTagsAsVersionsFor(List<String> branchesToUseTagsAsVersionsFor) {
+            this.branchesToUseTagsAsVersionsFor = branchesToUseTagsAsVersionsFor;
+        }
+
+        public boolean shouldDetermineVersionFromTag(String currentBranchName) {
+
+            if (!tryDeterminingCurrentVersionFromTagName) {
+                return false;
+            }
+            // Empty list means all branches
+            if (branchesToUseTagsAsVersionsFor.isEmpty()) {
+                return true;
+            }
+            return branchesToUseTagsAsVersionsFor.contains(currentBranchName);
+        }
     }
 }

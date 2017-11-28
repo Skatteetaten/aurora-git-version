@@ -29,7 +29,11 @@ class GitVersionTest extends Specification {
   def "Produces version from branch or tag name"() {
 
     given:
-      def options = new GitVersion.Options(fallbackToBranchNameEnv: false)
+      def options = new GitVersion.Options(
+              fallbackToBranchNameEnv: false,
+              branchesToUseTagsAsVersionsFor: tagBranches,
+              tryDeterminingCurrentVersionFromTagName: useTags
+      )
 
     when:
       def version = GitVersion.determineVersion(new File("$repoFolder/$repo"), options)
@@ -39,10 +43,13 @@ class GitVersionTest extends Specification {
       version.source == versionSource
 
     where:
-      repo               | expectedVersion    | versionSource
-      "on_branch"        | "develop-SNAPSHOT" | BRANCH
-      "on_tag"           | "1.0.0"            | TAG
-      "on_detached_head" | "develop-SNAPSHOT" | BRANCH
+      repo               | expectedVersion    | versionSource | useTags | tagBranches
+      "on_branch"        | "develop-SNAPSHOT" | BRANCH        | true    | []
+      "on_tag"           | "1.0.0"            | TAG           | true    | []
+      "on_detached_head" | "develop-SNAPSHOT" | BRANCH        | true    | []
+      "on_tag"           | "master-SNAPSHOT"  | BRANCH        | false   | []
+      "on_tag"           | "master-SNAPSHOT"  | BRANCH        | true    | ['develop']
+      "on_tag"           | "1.0.0"            | TAG           | true    | ['master']
   }
 
   def "Version from branch name"() {

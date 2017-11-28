@@ -59,6 +59,10 @@
   </modules>
 
   <build>
+    <!-- It really should not be necessary to specify this, but it seems IntelliJ will not add it as as source folder
+         if we don't. -->
+    <testSourceDirectory>${project.basedir}/src/test/groovy</testSourceDirectory>
+
     <pluginManagement>
       <plugins>
         <plugin>
