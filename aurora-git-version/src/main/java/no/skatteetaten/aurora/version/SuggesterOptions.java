@@ -36,6 +36,19 @@ public class SuggesterOptions {
     private List<String> branchesToInferReleaseVersionsFor = emptyList();
 
     /**
+     * Whether or not we should use try to use existing tags on the current commit for determining the current version.
+     * Setting this to <code>false</code> will always yield a snapshot version.
+     */
+    private boolean tryDeterminingCurrentVersionFromTagName = true;
+
+    /**
+     * A list of branch names that should use the tags of the current commit to determine version. Branches not in this
+     * list will always yield snapshot versions. An empty list will use all branches. Use
+     * <code>tryDeterminingCurrentVersionFromTagName</code> to disable this feature.
+     */
+    private List<String> branchesToUseTagsAsVersionsFor = emptyList();
+
+    /**
      * TODO: Document
      */
     private String versionHint = null;
@@ -91,5 +104,21 @@ public class SuggesterOptions {
 
     public void setGitRepoPath(String gitRepoPath) {
         this.gitRepoPath = gitRepoPath;
+    }
+
+    public boolean isTryDeterminingCurrentVersionFromTagName() {
+        return tryDeterminingCurrentVersionFromTagName;
+    }
+
+    public void setTryDeterminingCurrentVersionFromTagName(boolean tryDeterminingCurrentVersionFromTagName) {
+        this.tryDeterminingCurrentVersionFromTagName = tryDeterminingCurrentVersionFromTagName;
+    }
+
+    public List<String> getBranchesToUseTagsAsVersionsFor() {
+        return branchesToUseTagsAsVersionsFor;
+    }
+
+    public void setBranchesToUseTagsAsVersionsFor(List<String> branchesToUseTagsAsVersionsFor) {
+        this.branchesToUseTagsAsVersionsFor = branchesToUseTagsAsVersionsFor;
     }
 }

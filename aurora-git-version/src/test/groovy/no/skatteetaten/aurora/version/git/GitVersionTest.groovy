@@ -1,4 +1,4 @@
-package ske.aurora.version.git
+package no.skatteetaten.aurora.version.git
 
 import static no.skatteetaten.aurora.version.git.GitVersion.VersionSource.BRANCH
 import static no.skatteetaten.aurora.version.git.GitVersion.VersionSource.TAG
@@ -7,7 +7,6 @@ import org.apache.tools.ant.taskdefs.Expand
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 
-import no.skatteetaten.aurora.version.git.GitVersion
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -30,7 +29,11 @@ class GitVersionTest extends Specification {
   def "Produces version from branch or tag name"() {
 
     given:
-      def options = new GitVersion.Options(fallbackToBranchNameEnv: false)
+      def options = new GitVersion.Options(
+              fallbackToBranchNameEnv: false,
+              branchesToUseTagsAsVersionsFor: tagBranches,
+              tryDeterminingCurrentVersionFromTagName: useTags
+      )
 
     when:
       def version = GitVersion.determineVersion(new File("$repoFolder/$repo"), options)
@@ -40,10 +43,13 @@ class GitVersionTest extends Specification {
       version.source == versionSource
 
     where:
-      repo               | expectedVersion    | versionSource
-      "on_branch"        | "develop-SNAPSHOT" | BRANCH
-      "on_tag"           | "1.0.0"            | TAG
-      "on_detached_head" | "develop-SNAPSHOT" | BRANCH
+      repo               | expectedVersion    | versionSource | useTags | tagBranches
+      "on_branch"        | "develop-SNAPSHOT" | BRANCH        | true    | []
+      "on_tag"           | "1.0.0"            | TAG           | true    | []
+      "on_detached_head" | "develop-SNAPSHOT" | BRANCH        | true    | []
+      "on_tag"           | "master-SNAPSHOT"  | BRANCH        | false   | []
+      "on_tag"           | "master-SNAPSHOT"  | BRANCH        | true    | ['develop']
+      "on_tag"           | "1.0.0"            | TAG           | true    | ['master']
   }
 
   def "Version from branch name"() {
@@ -53,9 +59,9 @@ class GitVersionTest extends Specification {
       options.versionPrefix = '-SNAPSHOT'
       Repository repository = new FileRepositoryBuilder()
           .setGitDir(new File("$repoFolder/on_branch"))
-          .build();
+          .build()
 
-      def version = new GitVersion(repository, options)
+      def version = new GitVersion(new GitRepo(repository), options)
 
     expect:
       version.getVersionFromBranchName(branchName).version == expectedVersion
