@@ -18,7 +18,7 @@ a commit that is tagged with ```v1.0.0```, ```1.0.0``` is used as the version.
 Most of the time, though, in a CI/CD environment, the commit currently being built will not be tagged with a version
 tag. The default behaviour then is to use the name of the current branch postfixed with a label (default 
 ```-SNAPSHOT```). So, for example, if you are building from the branch ```develop``` and have not tagged the current
-commit, the version will become ```develop-SNAPSHOT```. Characters like ```/``` and ```_``` will be replaced by
+commit, the version will become ```develop-SNAPSHOT```. Characters like ```/``` and ```-``` will be replaced by
 ```_```, so a branch called ```feature/PROJ-458-some-new-feature``` will get the version 
 ```feature_PROJ_458_some_new_feature```.
 
