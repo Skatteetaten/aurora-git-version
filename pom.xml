@@ -59,6 +59,8 @@
   </modules>
 
   <build>
+    <testSourceDirectory>${project.basedir}/src/test/groovy</testSourceDirectory>
+
     <pluginManagement>
       <plugins>
         <plugin>
