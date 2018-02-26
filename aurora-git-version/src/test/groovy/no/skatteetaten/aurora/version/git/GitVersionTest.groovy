@@ -67,11 +67,11 @@ class GitVersionTest extends Specification {
       version.getVersionFromBranchName(branchName).version == expectedVersion
 
     where:
-      branchName                                                 | expectedVersion
-      "master"                                                   | "master-SNAPSHOT"
-      "develop"                                                  | "develop-SNAPSHOT"
-      "bugfix/AOC-8-dialog-for-a-bekrefte-endring-av-tagversjon" |
-          "bugfix_AOC_8_dialog_for_a_bekrefte_endring_av_tagversjon-SNAPSHOT"
+      branchName                                                                                                              | expectedVersion
+      "master"                                                                                                                | "master-SNAPSHOT"
+      "develop"                                                                                                               | "develop-SNAPSHOT"
+      "bugfix/AOC-8-dialog-for-a-bekrefte-endring-tagversjon"                                                                 | "bugfix_AOC_8_dialog_for_a_bekrefte_endring_tagversjon-SNAPSHOT"
+      "bugfix/AOC-8-dialog-for-a-bekrefte-endring-av-tagversjon-som-er-for-langt-branchnavn-til-at-det-gir-fornuftig-version" | "bugfix_AOC_8_dialog_for_a_bekrefte_endring_av_tagversj-SNAPSHOT"
   }
 
   def "Get most recent tag with no tags"() {

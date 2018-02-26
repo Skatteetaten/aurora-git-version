@@ -66,13 +66,13 @@ public class GitVersion {
         return versionTagOnHead
             .map(this::getVersionFromVersionTag)
             .orElseGet(() -> currentBranchName
-                .map(GitVersion::getVersionFromBranchName)
+                .map(this::getVersionFromBranchName)
                 .orElse(new Version(options.fallbackVersion, VersionSource.FALLBACK)));
     }
 
     protected Version getVersionFromVersionTag(String versionTag) {
         String version = versionTag.replaceFirst(options.versionPrefix, "");
-        return new Version(version, VersionSource.TAG);
+        return createVersion(VersionSource.TAG, version, "");
     }
 
     protected Optional<String> getVersionTagOnCommit(ObjectId head) {
@@ -85,10 +85,25 @@ public class GitVersion {
             options.fallbackBranchNameEnvName);
     }
 
-    public static Version getVersionFromBranchName(String currentBranchName) {
-        String versionSafeName = currentBranchName.replaceAll("[\\/-]", "_");
-        String version = String.format("%s-SNAPSHOT", versionSafeName);
-        return new Version(version, VersionSource.BRANCH);
+    public Version getVersionFromBranchName(String branchName) {
+
+        return createVersion(VersionSource.BRANCH, branchName, options.getVersionFromBranchNamePostfix());
+    }
+
+    protected Version createVersion(VersionSource versionSource, String versionName, String postfix) {
+
+        Assert.notNull(versionSource, "VersionSource cannot be null");
+        Assert.notNull(versionName, "VersionName cannot be null");
+
+        int versionNameMaxLength = options.getVersionMaxLength() - (postfix == null ? 0 : postfix.length());
+        int startIndex = Math.min(versionName.length(), versionNameMaxLength);
+
+        String versionSafeName = versionName.replaceAll("[\\/-]", "_");
+        versionSafeName = versionSafeName.substring(0, startIndex);
+
+        String version = String.format("%s%s", versionSafeName, postfix);
+
+        return new Version(version, versionSource);
     }
 
     public static Optional<String> getMostRecentTag(List<String> tags) {
@@ -138,11 +153,22 @@ public class GitVersion {
         }
     }
 
+
     public static class Options {
+        /**
+         * The default max length of generated version strings. This value actually takes onto consideration that
+         * the generated version string will be used where the size limits of domain name labels restricts what values
+         * can be used. See http://www.freesoft.org/CIE/RFC/1035/9.htm.
+         */
+        public static final int DEFAULT_VERSION_MAX_LENGTH = 63;
+
         private String versionPrefix = "v";
         private boolean fallbackToBranchNameEnv = true;
         private String fallbackVersion = "unknown";
         private String fallbackBranchNameEnvName = "BRANCH_NAME";
+        private String versionFromBranchNamePostfix = "-SNAPSHOT";
+        private int versionMaxLength = DEFAULT_VERSION_MAX_LENGTH;
+
 
         /**
          * Whether or not we should use try to use existing tags on the current commit for determining the current
@@ -216,6 +242,27 @@ public class GitVersion {
                 return true;
             }
             return branchesToUseTagsAsVersionsFor.contains(currentBranchName);
+        }
+
+        public String getVersionFromBranchNamePostfix() {
+            return versionFromBranchNamePostfix;
+        }
+
+        public void setVersionFromBranchNamePostfix(String versionFromBranchNamePostfix) {
+            this.versionFromBranchNamePostfix = versionFromBranchNamePostfix;
+        }
+
+        public int getVersionMaxLength() {
+            return versionMaxLength;
+        }
+
+        /**
+         * Note that overriding the default value for versionMaxLength may render the generated version string an
+         * illegal dns label.
+         * @param versionMaxLength
+         */
+        public void setVersionMaxLength(int versionMaxLength) {
+            this.versionMaxLength = versionMaxLength;
         }
     }
 }
