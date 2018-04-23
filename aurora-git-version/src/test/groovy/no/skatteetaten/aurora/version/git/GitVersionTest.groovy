@@ -3,27 +3,16 @@ package no.skatteetaten.aurora.version.git
 import static no.skatteetaten.aurora.version.git.GitVersion.VersionSource.BRANCH
 import static no.skatteetaten.aurora.version.git.GitVersion.VersionSource.TAG
 
-import org.apache.tools.ant.taskdefs.Expand
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 
+import no.skatteetaten.aurora.version.GitRepoHelper
 import spock.lang.Specification
 import spock.lang.Unroll
 
 class GitVersionTest extends Specification {
 
-  static String repoFolder
-
-  def setupSpec() {
-    // We need a couple of git repositories to test basic git functionality, but there is no easy way to version
-    // control one git repository from within another. So I have just zipped these test repos into an archive
-    // and unzip them before each test run.
-    def ant = new AntBuilder()
-    Expand unzip = ant.unzip(src: "src/test/resources/gitrepos.zip",
-        dest: "target/resources",
-        overwrite: "true")
-    repoFolder = "$unzip.dest/gitrepos"
-  }
+  static String repoFolder = GitRepoHelper.repoFolder
 
   @Unroll("#repo")
   def "Produces version from branch or tag name"() {

@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import no.skatteetaten.aurora.version.git.GitRepo;
 import no.skatteetaten.aurora.version.git.GitVersion;
+import no.skatteetaten.aurora.version.suggest.ReleaseTypeEvaluator;
 import no.skatteetaten.aurora.version.suggest.ReleaseVersionEvaluator;
 import no.skatteetaten.aurora.version.suggest.VersionNumber;
 
@@ -23,7 +24,7 @@ public final class VersionNumberSuggester {
     }
 
     public static String suggestVersion(SuggesterOptions options) {
-        return new VersionNumberSuggester(GitRepo.fromDir(options.getGitRepoPath()), options).suggestVersionInternal();
+        return new VersionNumberSuggester(GitRepo.fromDir(options.getGitRepoPath()), options).suggestVersionHelper();
     }
 
     private VersionNumberSuggester(GitRepo repository, SuggesterOptions options) {
@@ -31,7 +32,7 @@ public final class VersionNumberSuggester {
         this.options = options;
     }
 
-    private String suggestVersionInternal() {
+    private String suggestVersionHelper() {
 
         GitVersion.Version versionFromGit = new GitVersion(repository, createGitVersionOptions(options))
             .determineVersion();
@@ -60,9 +61,17 @@ public final class VersionNumberSuggester {
 
     private String getInferredVersion() {
         List<String> versions = repository.getAllVersionsFromTags(options.getVersionPrefix());
-        VersionNumber inferredVersion = new ReleaseVersionEvaluator(options.getVersionHint())
-            .suggestNextReleaseVersionFrom(versions);
 
+        ReleaseTypeEvaluator releaseTypeEvaluator = new ReleaseTypeEvaluator(
+            options.isDetermineVersionNumberBasedOnBranchPrefix(),
+            options.getPatchUpdateBranchPrefix(),
+            options.getMinorUpdateBranchPrefix());
+
+        ReleaseVersionEvaluator releaseVersionEvaluator = new ReleaseVersionEvaluator(
+            options.getVersionHint(),
+            releaseTypeEvaluator.evaluateRefLogComments(repository.getAllRefLogCommentsForCurrentHead()));
+
+        VersionNumber inferredVersion = releaseVersionEvaluator.suggestNextReleaseVersionFrom(versions);
         return inferredVersion.toString();
     }
 

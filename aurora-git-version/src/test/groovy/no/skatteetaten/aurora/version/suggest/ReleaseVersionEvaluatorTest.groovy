@@ -3,7 +3,7 @@ package no.skatteetaten.aurora.version.suggest
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class ReleaseVersionEvaluatorSpec extends Specification {
+class ReleaseVersionEvaluatorTest extends Specification {
   def "Suggested version number expands current version number by one segment"() {
     given:
       def existingVersions = ["1.2.1", "1.2.2", "1.3.1", "1.3.2", "1.3.3"]
@@ -55,7 +55,6 @@ class ReleaseVersionEvaluatorSpec extends Specification {
 
   }
 
-
   @Unroll
   def "Suggested version number is #expectedSuggestedReleaseVersion when existing versions are #existingVersions and current version is #currentVersion"() {
     when:
@@ -103,4 +102,44 @@ class ReleaseVersionEvaluatorSpec extends Specification {
     then:
       suggestedReleaseVersion.toString() == "1.6.3"
   }
+
+  @Unroll
+  def "Forced increment of #forcedSegment segment with hint #versionNumber shall result in #suggestedVersion"() {
+    given:
+      def existingVersions = ["1.2.0", "1.3.0", "1.2.1", "1.4.0", "1.4.1", "1.2.2", "1.4.2", "1.4.3"]
+    when:
+      def suggestedReleaseVersion = new ReleaseVersionEvaluator(versionNumber, Optional.of(forcedSegment))
+          .suggestNextReleaseVersionFrom(existingVersions)
+    then:
+      suggestedReleaseVersion.toString() == suggestedVersion
+    where:
+      forcedSegment        | versionNumber    | suggestedVersion
+      VersionSegment.PATCH | "1-SNAPSHOT"     | "1.4.4"
+      VersionSegment.PATCH | "2-SNAPSHOT"     | "2.0.0"
+      VersionSegment.PATCH | "1.0-SNAPSHOT"   | "1.0.0"
+      VersionSegment.PATCH | "1.1-SNAPSHOT"   | "1.1.0"
+      VersionSegment.PATCH | "1.2-SNAPSHOT"   | "1.2.3"
+      VersionSegment.PATCH | "1.4-SNAPSHOT"   | "1.4.4"
+      VersionSegment.PATCH | "1.5-SNAPSHOT"   | "1.5.0"
+      VersionSegment.PATCH | "2.0-SNAPSHOT"   | "2.0.0"
+      VersionSegment.PATCH | "2.1-SNAPSHOT"   | "2.1.0"
+      VersionSegment.PATCH | "1.0.1-SNAPSHOT" | "1.0.1"
+      VersionSegment.PATCH | "1.2.1-SNAPSHOT" | "1.2.3"
+      VersionSegment.PATCH | "2.0.0-SNAPSHOT" | "2.0.0"
+      VersionSegment.PATCH | "2.0.1-SNAPSHOT" | "2.0.1"
+      VersionSegment.MINOR | "1-SNAPSHOT"     | "1.5.0"
+      VersionSegment.MINOR | "2-SNAPSHOT"     | "2.0.0"
+      VersionSegment.MINOR | "1.0-SNAPSHOT"   | "1.5.0"
+      VersionSegment.MINOR | "1.1-SNAPSHOT"   | "1.5.0"
+      VersionSegment.MINOR | "1.2-SNAPSHOT"   | "1.5.0"
+      VersionSegment.MINOR | "1.4-SNAPSHOT"   | "1.5.0"
+      VersionSegment.MINOR | "1.5-SNAPSHOT"   | "1.5.0"
+      VersionSegment.MINOR | "2.0-SNAPSHOT"   | "2.0.0"
+      VersionSegment.MINOR | "2.1-SNAPSHOT"   | "2.1.0"
+      VersionSegment.MINOR | "1.0.1-SNAPSHOT" | "1.5.0"
+      VersionSegment.MINOR | "1.2.1-SNAPSHOT" | "1.5.0"
+      VersionSegment.MINOR | "2.0.0-SNAPSHOT" | "2.0.0"
+      VersionSegment.MINOR | "2.0.1-SNAPSHOT" | "2.0.1"
+  }
+
 }

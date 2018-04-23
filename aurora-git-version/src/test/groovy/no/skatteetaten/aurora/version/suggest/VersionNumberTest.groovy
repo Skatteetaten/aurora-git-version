@@ -2,7 +2,7 @@ package no.skatteetaten.aurora.version.suggest
 
 import spock.lang.Specification
 
-class VersionNumberSpec extends Specification {
+class VersionNumberTest extends Specification {
 
   def "version number with major, minor and revision versions outputs X.Y.Z"() {
     given:

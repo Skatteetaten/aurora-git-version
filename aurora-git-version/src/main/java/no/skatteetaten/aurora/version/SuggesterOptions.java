@@ -58,6 +58,32 @@ public class SuggesterOptions {
      */
     private String gitRepoPath;
 
+    /**
+     * Use name of the branch last merged originated from to determine next version number,
+     * partly overriding the versionHint.
+     *
+     * Empty list of prefixes in both 'determineVersionNumberBasedOnBranchPrefix' and
+     * 'determineVersionNumberBasedOnBranchPrefix' will have the same effect as setting this option to false.
+     *
+     * Will fall back to using the versionHint if the branch prefix is not determined, or it is not a part of
+     * 'minorUpdateBranchPrefix' or 'patchUpdateBranchPrefix'. Which is the same as setting this option to false.
+     */
+    private boolean determineVersionNumberBasedOnBranchPrefix = false;
+
+    /**
+     * Comma separated list of branch prefixes which should step the MINOR part of the version number
+     * Empty list means all branches, except for those mentioned in 'patchUpdateBranchPrefix'
+     * Only valid if 'determineVersionNumberBasedOnBranchPrefix' is set to true
+     */
+    private String minorUpdateBranchPrefix = "feature";
+
+    /**
+     * Comma separated list of branch prefixes which should step the PATCH part of the version number
+     * Empty list means all branches, except for those mentioned in 'minorUpdateBranchPrefix'
+     * Only valid if 'determineVersionNumberBasedOnBranchPrefix' is set to true
+     */
+    private String patchUpdateBranchPrefix = "patch,hotfix,bugfix";
+
     public List<String> getBranchesToInferReleaseVersionsFor() {
         return branchesToInferReleaseVersionsFor;
     }
@@ -120,5 +146,29 @@ public class SuggesterOptions {
 
     public void setBranchesToUseTagsAsVersionsFor(List<String> branchesToUseTagsAsVersionsFor) {
         this.branchesToUseTagsAsVersionsFor = branchesToUseTagsAsVersionsFor;
+    }
+
+    public boolean isDetermineVersionNumberBasedOnBranchPrefix() {
+        return determineVersionNumberBasedOnBranchPrefix;
+    }
+
+    public void setDetermineVersionNumberBasedOnBranchPrefix(boolean determineVersionNumberBasedOnBranchPrefix) {
+        this.determineVersionNumberBasedOnBranchPrefix = determineVersionNumberBasedOnBranchPrefix;
+    }
+
+    public String getMinorUpdateBranchPrefix() {
+        return minorUpdateBranchPrefix;
+    }
+
+    public void setMinorUpdateBranchPrefix(String minorUpdateBranchPrefix) {
+        this.minorUpdateBranchPrefix = minorUpdateBranchPrefix;
+    }
+
+    public String getPatchUpdateBranchPrefix() {
+        return patchUpdateBranchPrefix;
+    }
+
+    public void setPatchUpdateBranchPrefix(String patchUpdateBranchPrefix) {
+        this.patchUpdateBranchPrefix = patchUpdateBranchPrefix;
     }
 }

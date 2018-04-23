@@ -58,11 +58,17 @@ public final class Main {
             }
         }
 
+        String forcePatchPrefixes = cmd.getOptionValue("force-patch-prefixes", "");
+        String forceMinorPrefixes = cmd.getOptionValue("force-minor-prefixes", "");
+
         SuggesterOptions suggesterOptions = new SuggesterOptions();
         suggesterOptions.setGitRepoPath(path);
         suggesterOptions.setBranchesToInferReleaseVersionsFor(branchesToStipulateReleaseVersionsFor);
         suggesterOptions.setVersionHint(versionHint);
-
+        suggesterOptions.setPatchUpdateBranchPrefix(forcePatchPrefixes);
+        suggesterOptions.setMinorUpdateBranchPrefix(forceMinorPrefixes);
+        suggesterOptions.setDetermineVersionNumberBasedOnBranchPrefix(
+            !forcePatchPrefixes.isEmpty() || !forceMinorPrefixes.isEmpty());
         return suggesterOptions;
     }
 
@@ -81,6 +87,14 @@ public final class Main {
                 + "- required when using --suggest-releases")
             .hasArg()
             .build());
+        options.addOption(Option.builder().longOpt("force-patch-prefixes")
+            .desc("comma separated list for branch prefixes which will force increase of the versions patch segment"
+                + ", leave empty or unused to disable. Only usable together with --suggest-releases")
+            .hasArg().build());
+        options.addOption(Option.builder().longOpt("force-minor-prefixes")
+            .desc("comma separated list for branch prefixes which will force increase of the versions minor segment"
+                + ", leave empty or unused to disable. Only usable together with --suggest-releases")
+            .hasArg().build());
         return options;
     }
 
