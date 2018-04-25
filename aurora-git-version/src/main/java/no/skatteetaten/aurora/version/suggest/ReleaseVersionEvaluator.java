@@ -2,85 +2,51 @@ package no.skatteetaten.aurora.version.suggest;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-/**
- * This class is a Java implementation of Tommy Bø's original implementation in Groovy that could be found in the
- * aurora-cd maven plugin. It has been extended with support for forced update of given version segment.
- * <p>
- * http://semver.org/
- */
-public class ReleaseVersionEvaluator {
+public final class ReleaseVersionEvaluator {
 
-    private final VersionNumber currentVersion;
-    private final Optional<VersionSegment> forcedSegment;
-
-    public ReleaseVersionEvaluator(String versionNumber) {
-        this.currentVersion = VersionNumber.parse(versionNumber);
-        this.forcedSegment = Optional.empty();
+    private ReleaseVersionEvaluator() {
     }
 
-    public ReleaseVersionEvaluator(String versionNumber, Optional<VersionSegment> forcedUpdateOfVersionSegment) {
-        this.currentVersion = VersionNumber.parse(versionNumber);
-        this.forcedSegment = forcedUpdateOfVersionSegment;
-    }
+    /**
+     * Evaluates the current version and which segment of it to suggest an update for.
+     * According to http://semver.org/
+     * <p>
+     * If none of the forced update conditions apply, the number of version segments in the current
+     * SNAPSHOT version will dictate which segment to increment.<br>
+     *   Examples:<br>
+     *     1.0-SNAPSHOT - Increment PATCH to next patch version<br>
+     *     1-SNAPSHOT   - Increment MINOR to next minor version<br>
+     */
+    public static VersionSegment findVersionSegmentToIncrement(
+        String currentVersionAsString,
+        Optional<String> originatingBranchName,
+        List<String> forcePatchIncrementForBranchPrefixes,
+        List<String> forceMinorIncrementForBranchPrefixes) {
 
-    public VersionNumber suggestNextReleaseVersionFrom(List<String> listOfVersions) {
-        List<VersionNumber> orderedListOfVersions = listOfVersions.stream()
-            .filter(VersionNumber::isValid)
-            .map(VersionNumber::parse)
-            .sorted()
-            .collect(Collectors.toList());
+        VersionNumber currentVersion = VersionNumber.parse(currentVersionAsString);
 
-        Optional<VersionNumber> eligibleVersion = orderedListOfVersions.stream()
-            .filter(currentVersion::canBeUsedWhenDeterminingReleaseVersion)
-            .reduce((first, second) -> second);
-
-        Optional<VersionNumber> lastRelease = orderedListOfVersions.stream()
-            .filter(versionNumber -> !versionNumber.isSnapshot())
-            .reduce((first, second) -> second);
-
-        // forced update of minor version segment, unless hint indicates step in major version number
-        if (forcedSegmentIs(VersionSegment.MINOR)) {
-            int currentVersionMajor = Integer.parseInt(currentVersion.getVersionNumberSegments().get(0));
-            int lastReleaseMajor = lastRelease
-                .map(vn -> Integer.parseInt(vn.getVersionNumberSegments().get(0)))
-                .orElse(0);
-            if (currentVersionMajor > lastReleaseMajor) {
-                return currentVersion.unlockVersion();
-            }
-            return lastRelease
-                .map(VersionNumber::incrementMinorSegment)
-                .orElse(currentVersion.unlockVersion());
+        if (prefixListContainsBranchName(originatingBranchName, forceMinorIncrementForBranchPrefixes)) {
+            return VersionSegment.MINOR;
+        }
+        if (prefixListContainsBranchName(originatingBranchName, forcePatchIncrementForBranchPrefixes)) {
+            return VersionSegment.PATCH;
         }
 
-        // eligible version has never been used
-        if (!eligibleVersion.isPresent()) {
-            return currentVersion.unlockVersion();
-        }
-
-        // eligible version has been used, forcing patch update, use next available patch version
-        if (forcedSegmentIs(VersionSegment.PATCH)) {
-            return eligibleVersion.get().incrementPatchSegment();
-        }
-
-        // eligible version has been used, version hint indicating minor should be increased
         if (currentVersion.getVersionNumberSegments().size() == 1) {
-            return eligibleVersion.get().incrementMinorSegment();
+            return VersionSegment.MINOR;
+        } else {
+            return VersionSegment.PATCH;
         }
-
-        // no other rules apply, use next available patch version
-        return eligibleVersion.get().incrementPatchSegment();
     }
 
-    private boolean forcedSegmentIs(VersionSegment versionSegment) {
-        if (versionSegment == null) {
-            return false;
-        }
-        if (!forcedSegment.isPresent()) {
-            return false;
-        }
-        return versionSegment.equals(forcedSegment.get());
+    private static boolean prefixListContainsBranchName(Optional<String> optionalBranchName, List<String> prefixList) {
+        return optionalBranchName
+            .flatMap(branchName ->
+                prefixList.stream()
+                    .filter(branchName::startsWith)
+                    .findFirst())
+            .isPresent();
     }
 
 }

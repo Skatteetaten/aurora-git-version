@@ -5,9 +5,11 @@ import java.util.Optional;
 
 import no.skatteetaten.aurora.version.git.GitRepo;
 import no.skatteetaten.aurora.version.git.GitVersion;
-import no.skatteetaten.aurora.version.suggest.ReleaseTypeEvaluator;
+import no.skatteetaten.aurora.version.git.RefLogParser;
 import no.skatteetaten.aurora.version.suggest.ReleaseVersionEvaluator;
+import no.skatteetaten.aurora.version.suggest.ReleaseVersionIncrementer;
 import no.skatteetaten.aurora.version.suggest.VersionNumber;
+import no.skatteetaten.aurora.version.suggest.VersionSegment;
 
 /**
  * Class for suggesting a version (typically an application or library version) based on the state of the current
@@ -60,18 +62,21 @@ public final class VersionNumberSuggester {
     }
 
     private String getInferredVersion() {
-        List<String> versions = repository.getAllVersionsFromTags(options.getVersionPrefix());
+        List<String> existingVersions = repository.getAllVersionsFromTags(options.getVersionPrefix());
+        List<String> refLogComments = repository.getAllRefLogCommentsForCurrentHead();
+        Optional<String> originatingBranchName = RefLogParser.findOriginatingBranchName(refLogComments);
 
-        ReleaseTypeEvaluator releaseTypeEvaluator = new ReleaseTypeEvaluator(
-            options.isDetermineVersionNumberBasedOnBranchPrefix(),
-            options.getPatchUpdateBranchPrefix(),
-            options.getMinorUpdateBranchPrefix());
-
-        ReleaseVersionEvaluator releaseVersionEvaluator = new ReleaseVersionEvaluator(
+        VersionSegment versionSegmentToIncrement = ReleaseVersionEvaluator.findVersionSegmentToIncrement(
             options.getVersionHint(),
-            releaseTypeEvaluator.evaluateRefLogComments(repository.getAllRefLogCommentsForCurrentHead()));
+            originatingBranchName,
+            options.getForcePatchIncrementForBranchPrefixes(),
+            options.getForceMinorIncrementForBranchPrefixes());
 
-        VersionNumber inferredVersion = releaseVersionEvaluator.suggestNextReleaseVersionFrom(versions);
+        VersionNumber inferredVersion = ReleaseVersionIncrementer.suggestNextReleaseVersion(
+            versionSegmentToIncrement,
+            options.getVersionHint(),
+            existingVersions);
+
         return inferredVersion.toString();
     }
 

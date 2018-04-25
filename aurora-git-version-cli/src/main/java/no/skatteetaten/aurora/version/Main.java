@@ -45,30 +45,23 @@ public final class Main {
     private static SuggesterOptions createSuggesterOptionsFromApplicationArgs(CommandLine cmd) {
 
         String path = cmd.getOptionValue("p", "./");
-        String suggestReleasesCsv = cmd.getOptionValue("suggest-releases", "");
-        List<String> branchesToStipulateReleaseVersionsFor = Arrays.stream(suggestReleasesCsv.
-            split(","))
-            .map(String::trim)
-            .filter(s -> !s.isEmpty())
-            .collect(Collectors.toList());
         String versionHint = cmd.getOptionValue("version-hint", "");
+        List<String> branchesToStipulateReleaseVersionsFor = getCommaSeparatedOptionValue(cmd, "suggest-releases");
+        List<String> forcePatchPrefixes = getCommaSeparatedOptionValue(cmd, "force-patch-prefixes");
+        List<String> forceMinorPrefixes = getCommaSeparatedOptionValue(cmd, "force-minor-prefixes");
+
         if (!branchesToStipulateReleaseVersionsFor.isEmpty()) {
             if (versionHint.isEmpty()) {
                 throw new IllegalArgumentException("version-hint is required when using suggest-releases");
             }
         }
 
-        String forcePatchPrefixes = cmd.getOptionValue("force-patch-prefixes", "");
-        String forceMinorPrefixes = cmd.getOptionValue("force-minor-prefixes", "");
-
         SuggesterOptions suggesterOptions = new SuggesterOptions();
         suggesterOptions.setGitRepoPath(path);
         suggesterOptions.setBranchesToInferReleaseVersionsFor(branchesToStipulateReleaseVersionsFor);
         suggesterOptions.setVersionHint(versionHint);
-        suggesterOptions.setPatchUpdateBranchPrefix(forcePatchPrefixes);
-        suggesterOptions.setMinorUpdateBranchPrefix(forceMinorPrefixes);
-        suggesterOptions.setDetermineVersionNumberBasedOnBranchPrefix(
-            !forcePatchPrefixes.isEmpty() || !forceMinorPrefixes.isEmpty());
+        suggesterOptions.setForcePatchIncrementForBranchPrefixes(forcePatchPrefixes);
+        suggesterOptions.setForceMinorIncrementForBranchPrefixes(forceMinorPrefixes);
         return suggesterOptions;
     }
 
@@ -103,5 +96,16 @@ public final class Main {
         HelpFormatter formatter = new HelpFormatter();
         formatter.setWidth(HELP_WIDTH);
         formatter.printHelp("java -jar aurora-git-version-cli.jar", options);
+    }
+
+    private static List<String> getCommaSeparatedOptionValue(CommandLine cmd, String opt) {
+        return commaSeparatedStringToList(cmd.getOptionValue(opt, ""));
+    }
+
+    private static List<String> commaSeparatedStringToList(String commaSeparatedString) {
+        return Arrays.stream(commaSeparatedString.split(","))
+            .map(String::trim)
+            .filter(s -> !s.isEmpty())
+            .collect(Collectors.toList());
     }
 }

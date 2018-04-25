@@ -2,6 +2,7 @@ package no.skatteetaten.aurora.version;
 
 import static java.util.Collections.emptyList;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -59,30 +60,14 @@ public class SuggesterOptions {
     private String gitRepoPath;
 
     /**
-     * Use name of the branch last merged originated from to determine next version number,
-     * partly overriding the versionHint.
-     *
-     * Empty list of prefixes in both 'determineVersionNumberBasedOnBranchPrefix' and
-     * 'determineVersionNumberBasedOnBranchPrefix' will have the same effect as setting this option to false.
-     *
-     * Will fall back to using the versionHint if the branch prefix is not determined, or it is not a part of
-     * 'minorUpdateBranchPrefix' or 'patchUpdateBranchPrefix'. Which is the same as setting this option to false.
+     * List of branch prefixes which shall force increment of MINOR segment in version number
      */
-    private boolean determineVersionNumberBasedOnBranchPrefix = false;
+    private List<String> forceMinorIncrementForBranchPrefixes = Collections.emptyList();
 
     /**
-     * Comma separated list of branch prefixes which should step the MINOR part of the version number
-     * Empty list means all branches, except for those mentioned in 'patchUpdateBranchPrefix'
-     * Only valid if 'determineVersionNumberBasedOnBranchPrefix' is set to true
+     * List of branch prefixes which shall force increment of PATCH segment in version number
      */
-    private String minorUpdateBranchPrefix = "feature";
-
-    /**
-     * Comma separated list of branch prefixes which should step the PATCH part of the version number
-     * Empty list means all branches, except for those mentioned in 'minorUpdateBranchPrefix'
-     * Only valid if 'determineVersionNumberBasedOnBranchPrefix' is set to true
-     */
-    private String patchUpdateBranchPrefix = "patch,hotfix,bugfix";
+    private List<String> forcePatchIncrementForBranchPrefixes = Collections.emptyList();
 
     public List<String> getBranchesToInferReleaseVersionsFor() {
         return branchesToInferReleaseVersionsFor;
@@ -148,27 +133,19 @@ public class SuggesterOptions {
         this.branchesToUseTagsAsVersionsFor = branchesToUseTagsAsVersionsFor;
     }
 
-    public boolean isDetermineVersionNumberBasedOnBranchPrefix() {
-        return determineVersionNumberBasedOnBranchPrefix;
+    public List<String> getForceMinorIncrementForBranchPrefixes() {
+        return forceMinorIncrementForBranchPrefixes;
     }
 
-    public void setDetermineVersionNumberBasedOnBranchPrefix(boolean determineVersionNumberBasedOnBranchPrefix) {
-        this.determineVersionNumberBasedOnBranchPrefix = determineVersionNumberBasedOnBranchPrefix;
+    public void setForceMinorIncrementForBranchPrefixes(List<String> forceMinorIncrementForBranchPrefixes) {
+        this.forceMinorIncrementForBranchPrefixes = forceMinorIncrementForBranchPrefixes;
     }
 
-    public String getMinorUpdateBranchPrefix() {
-        return minorUpdateBranchPrefix;
+    public List<String> getForcePatchIncrementForBranchPrefixes() {
+        return forcePatchIncrementForBranchPrefixes;
     }
 
-    public void setMinorUpdateBranchPrefix(String minorUpdateBranchPrefix) {
-        this.minorUpdateBranchPrefix = minorUpdateBranchPrefix;
-    }
-
-    public String getPatchUpdateBranchPrefix() {
-        return patchUpdateBranchPrefix;
-    }
-
-    public void setPatchUpdateBranchPrefix(String patchUpdateBranchPrefix) {
-        this.patchUpdateBranchPrefix = patchUpdateBranchPrefix;
+    public void setForcePatchIncrementForBranchPrefixes(List<String> forcePatchIncrementForBranchPrefixes) {
+        this.forcePatchIncrementForBranchPrefixes = forcePatchIncrementForBranchPrefixes;
     }
 }
