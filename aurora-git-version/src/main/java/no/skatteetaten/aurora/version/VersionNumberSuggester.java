@@ -3,9 +3,11 @@ package no.skatteetaten.aurora.version;
 import java.util.List;
 import java.util.Optional;
 
+import org.eclipse.jgit.revwalk.RevCommit;
+
+import no.skatteetaten.aurora.version.git.GitLogParser;
 import no.skatteetaten.aurora.version.git.GitRepo;
 import no.skatteetaten.aurora.version.git.GitVersion;
-import no.skatteetaten.aurora.version.git.RefLogParser;
 import no.skatteetaten.aurora.version.suggest.ReleaseVersionEvaluator;
 import no.skatteetaten.aurora.version.suggest.ReleaseVersionIncrementer;
 import no.skatteetaten.aurora.version.suggest.VersionNumber;
@@ -63,8 +65,8 @@ public final class VersionNumberSuggester {
 
     private String getInferredVersion() {
         List<String> existingVersions = repository.getAllVersionsFromTags(options.getVersionPrefix());
-        List<String> refLogComments = repository.getAllRefLogCommentsForCurrentHead();
-        Optional<String> originatingBranchName = RefLogParser.findOriginatingBranchName(refLogComments);
+        Optional<RevCommit> commitLogEntry = repository.getLogEntryForCurrentHead();
+        Optional<String> originatingBranchName = GitLogParser.findOriginatingBranchName(commitLogEntry);
 
         VersionSegment versionSegmentToIncrement = ReleaseVersionEvaluator.findVersionSegmentToIncrement(
             options.getVersionHint(),

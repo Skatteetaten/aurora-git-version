@@ -13,7 +13,6 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.lib.ReflogEntry;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -76,22 +75,6 @@ public class GitRepo {
     }
 
     /**
-     * Get all ref log entries with new id matching the given commit id
-     */
-    public List<ReflogEntry> getRefLogEntriesForCommit(ObjectId commit) {
-        if (commit == null) {
-            return Collections.emptyList();
-        }
-        return withRepo(repository -> {
-            try (Git git = new Git(repository)) {
-                return git.reflog().call().stream()
-                    .filter(reflogEntry -> commit.equals(reflogEntry.getNewId()))
-                    .collect(Collectors.toList());
-            }
-        });
-    }
-
-    /**
      * Get the first log entry with an id matching the given commit id
      */
     public Optional<RevCommit> getLogEntryForCommit(ObjectId commit) {
@@ -100,10 +83,8 @@ public class GitRepo {
         }
         return withRepo(repository -> {
             try (Git git = new Git(repository)) {
-                Iterable<RevCommit> revCommitIterable = git.log().call();
-                return StreamSupport.stream(revCommitIterable.spliterator(), false)
-                    .filter(revCommit -> commit.equals(revCommit.getId()))
-                    .findFirst();
+                Iterable<RevCommit> revCommitIterable = git.log().add(commit).call();
+                return StreamSupport.stream(revCommitIterable.spliterator(), false).findFirst();
             }
         });
     }
@@ -185,10 +166,8 @@ public class GitRepo {
             .collect(Collectors.toList()));
     }
 
-    public List<String> getAllRefLogCommentsForCurrentHead() {
-        return getRefLogEntriesForCommit(resolve("HEAD")).stream()
-            .map(entry -> entry.getComment())
-            .collect(Collectors.toList());
+    public Optional<RevCommit> getLogEntryForCurrentHead() {
+        return getLogEntryForCommit(resolve("HEAD"));
     }
 
     private <T> T withRepo(NoExceptionFunction<Repository, T> fn) {

@@ -38,48 +38,24 @@ class GitRepoTest extends Specification {
   }
 
   @Unroll("#repo")
-  def "shall be able to retrieve ref log entries for a given commit"() {
+  def "shall be able to retrieve log entry for current head"() {
 
     given:
       def repoDirectory = "$repoFolder/$repo"
       def gitRepo = GitRepo.fromDir(repoDirectory)
 
     when:
-      def refLogEntries = gitRepo.getRefLogEntriesForCommit(gitRepo.resolve("HEAD"))
-      def refLogEntriesComment = refLogEntries.collect { it.comment }
+      def revCommit = gitRepo.getLogEntryForCurrentHead().get()
 
     then:
-      refLogEntries.size() == comments.size()
-      refLogEntriesComment.containsAll(comments)
+      revCommit.type == type
+      revCommit.name == name
+      revCommit.fullMessage.trim() == fullMessage
 
     where:
-      repo                          | comments
-      "on_detached_head"            | ["checkout: moving from develop to 7aa95ecd3ec7958bfc0e08b497d2c3c391e3df3f", "commit: A change"]
-      "on_master_with_ff_merge"     | ["checkout: moving from 1ab2be8918ea732d0631fb56bd955506ce2e85fb to master", "merge bugfix/PROJ-321-fix-me: Fast-forward", "commit: PROJ-321 fixed the fix me"]
-      "on_master_with_merge_commit" | ["checkout: moving from dd31dba24c531781676336a4cc418d7dde8c956b to master", "merge feature/PROJ-123-feature: Merge made by the 'recursive' strategy."]
-      "on_master_without_tag"       | ["commit: A change"]
-  }
-
-  @Unroll("#repo")
-  def "shall be able to retrieve ref log comments for current head"() {
-
-    given:
-      def repoDirectory = "$repoFolder/$repo"
-      def gitRepo = GitRepo.fromDir(repoDirectory)
-
-    when:
-      def refLogComments = gitRepo.getAllRefLogCommentsForCurrentHead()
-
-    then:
-      refLogComments.size() == comments.size()
-      refLogComments.containsAll(comments)
-
-    where:
-      repo                          | comments
-      "on_detached_head"            | ["checkout: moving from develop to 7aa95ecd3ec7958bfc0e08b497d2c3c391e3df3f", "commit: A change"]
-      "on_master_with_ff_merge"     | ["checkout: moving from 1ab2be8918ea732d0631fb56bd955506ce2e85fb to master", "merge bugfix/PROJ-321-fix-me: Fast-forward", "commit: PROJ-321 fixed the fix me"]
-      "on_master_with_merge_commit" | ["checkout: moving from dd31dba24c531781676336a4cc418d7dde8c956b to master", "merge feature/PROJ-123-feature: Merge made by the 'recursive' strategy."]
-      "on_master_without_tag"       | ["commit: A change"]
+      repo                          | type       | name                                       | fullMessage
+      "on_branch"                   | OBJ_COMMIT | "edf6570e29a70ce9d52f40416ff81cf092b4f19e" | "README.md"
+      "on_detached_head"            | OBJ_COMMIT | "7aa95ecd3ec7958bfc0e08b497d2c3c391e3df3f" | "A change"
   }
 
 }
