@@ -2,6 +2,7 @@ package no.skatteetaten.aurora.version;
 
 import static java.util.Collections.emptyList;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -57,6 +58,16 @@ public class SuggesterOptions {
      * The path of the git repository to use
      */
     private String gitRepoPath;
+
+    /**
+     * List of branch prefixes which shall force increment of MINOR segment in version number
+     */
+    private List<String> forceMinorIncrementForBranchPrefixes = Collections.emptyList();
+
+    /**
+     * List of branch prefixes which shall force increment of PATCH segment in version number
+     */
+    private List<String> forcePatchIncrementForBranchPrefixes = Collections.emptyList();
 
     public List<String> getBranchesToInferReleaseVersionsFor() {
         return branchesToInferReleaseVersionsFor;
@@ -120,5 +131,21 @@ public class SuggesterOptions {
 
     public void setBranchesToUseTagsAsVersionsFor(List<String> branchesToUseTagsAsVersionsFor) {
         this.branchesToUseTagsAsVersionsFor = branchesToUseTagsAsVersionsFor;
+    }
+
+    public List<String> getForceMinorIncrementForBranchPrefixes() {
+        return forceMinorIncrementForBranchPrefixes;
+    }
+
+    public void setForceMinorIncrementForBranchPrefixes(List<String> forceMinorIncrementForBranchPrefixes) {
+        this.forceMinorIncrementForBranchPrefixes = forceMinorIncrementForBranchPrefixes;
+    }
+
+    public List<String> getForcePatchIncrementForBranchPrefixes() {
+        return forcePatchIncrementForBranchPrefixes;
+    }
+
+    public void setForcePatchIncrementForBranchPrefixes(List<String> forcePatchIncrementForBranchPrefixes) {
+        this.forcePatchIncrementForBranchPrefixes = forcePatchIncrementForBranchPrefixes;
     }
 }

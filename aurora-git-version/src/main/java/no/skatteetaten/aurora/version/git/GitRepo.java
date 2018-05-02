@@ -3,9 +3,11 @@ package no.skatteetaten.aurora.version.git;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Constants;
@@ -46,6 +48,9 @@ public class GitRepo {
     }
 
     public List<String> getVersionTagsFromCommit(ObjectId commit, String versionPrefix) {
+        if (commit == null) {
+            return Collections.emptyList();
+        }
         return withRepo(repository -> {
             List<String> tags = new ArrayList<>();
             try (Git git = new Git(repository)) {
@@ -66,6 +71,21 @@ public class GitRepo {
                 }
             }
             return tags;
+        });
+    }
+
+    /**
+     * Get the first log entry with an id matching the given commit id
+     */
+    public Optional<RevCommit> getLogEntryForCommit(ObjectId commit) {
+        if (commit == null) {
+            return Optional.empty();
+        }
+        return withRepo(repository -> {
+            try (Git git = new Git(repository)) {
+                Iterable<RevCommit> revCommitIterable = git.log().add(commit).call();
+                return StreamSupport.stream(revCommitIterable.spliterator(), false).findFirst();
+            }
         });
     }
 
@@ -144,6 +164,10 @@ public class GitRepo {
             .filter(e -> e.getKey().startsWith(prefix))
             .map(e -> e.getKey().replaceFirst(prefix, ""))
             .collect(Collectors.toList()));
+    }
+
+    public Optional<RevCommit> getLogEntryForCurrentHead() {
+        return getLogEntryForCommit(resolve("HEAD"));
     }
 
     private <T> T withRepo(NoExceptionFunction<Repository, T> fn) {

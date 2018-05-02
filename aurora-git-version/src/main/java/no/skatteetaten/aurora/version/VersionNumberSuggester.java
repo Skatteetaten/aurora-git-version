@@ -3,10 +3,15 @@ package no.skatteetaten.aurora.version;
 import java.util.List;
 import java.util.Optional;
 
+import org.eclipse.jgit.revwalk.RevCommit;
+
+import no.skatteetaten.aurora.version.git.GitLogParser;
 import no.skatteetaten.aurora.version.git.GitRepo;
 import no.skatteetaten.aurora.version.git.GitVersion;
 import no.skatteetaten.aurora.version.suggest.ReleaseVersionEvaluator;
+import no.skatteetaten.aurora.version.suggest.ReleaseVersionIncrementer;
 import no.skatteetaten.aurora.version.suggest.VersionNumber;
+import no.skatteetaten.aurora.version.suggest.VersionSegment;
 
 /**
  * Class for suggesting a version (typically an application or library version) based on the state of the current
@@ -23,7 +28,7 @@ public final class VersionNumberSuggester {
     }
 
     public static String suggestVersion(SuggesterOptions options) {
-        return new VersionNumberSuggester(GitRepo.fromDir(options.getGitRepoPath()), options).suggestVersionInternal();
+        return new VersionNumberSuggester(GitRepo.fromDir(options.getGitRepoPath()), options).suggestVersionHelper();
     }
 
     private VersionNumberSuggester(GitRepo repository, SuggesterOptions options) {
@@ -31,7 +36,7 @@ public final class VersionNumberSuggester {
         this.options = options;
     }
 
-    private String suggestVersionInternal() {
+    private String suggestVersionHelper() {
 
         GitVersion.Version versionFromGit = new GitVersion(repository, createGitVersionOptions(options))
             .determineVersion();
@@ -59,9 +64,20 @@ public final class VersionNumberSuggester {
     }
 
     private String getInferredVersion() {
-        List<String> versions = repository.getAllVersionsFromTags(options.getVersionPrefix());
-        VersionNumber inferredVersion = new ReleaseVersionEvaluator(options.getVersionHint())
-            .suggestNextReleaseVersionFrom(versions);
+        List<String> existingVersions = repository.getAllVersionsFromTags(options.getVersionPrefix());
+        Optional<RevCommit> commitLogEntry = repository.getLogEntryForCurrentHead();
+        Optional<String> originatingBranchName = GitLogParser.findOriginatingBranchName(commitLogEntry);
+
+        VersionSegment versionSegmentToIncrement = ReleaseVersionEvaluator.findVersionSegmentToIncrement(
+            options.getVersionHint(),
+            originatingBranchName,
+            options.getForcePatchIncrementForBranchPrefixes(),
+            options.getForceMinorIncrementForBranchPrefixes());
+
+        VersionNumber inferredVersion = ReleaseVersionIncrementer.suggestNextReleaseVersion(
+            versionSegmentToIncrement,
+            options.getVersionHint(),
+            existingVersions);
 
         return inferredVersion.toString();
     }

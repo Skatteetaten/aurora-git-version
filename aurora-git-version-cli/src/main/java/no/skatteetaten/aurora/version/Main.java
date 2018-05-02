@@ -45,13 +45,11 @@ public final class Main {
     private static SuggesterOptions createSuggesterOptionsFromApplicationArgs(CommandLine cmd) {
 
         String path = cmd.getOptionValue("p", "./");
-        String suggestReleasesCsv = cmd.getOptionValue("suggest-releases", "");
-        List<String> branchesToStipulateReleaseVersionsFor = Arrays.stream(suggestReleasesCsv.
-            split(","))
-            .map(String::trim)
-            .filter(s -> !s.isEmpty())
-            .collect(Collectors.toList());
         String versionHint = cmd.getOptionValue("version-hint", "");
+        List<String> branchesToStipulateReleaseVersionsFor = getCommaSeparatedOptionValue(cmd, "suggest-releases");
+        List<String> forcePatchPrefixes = getCommaSeparatedOptionValue(cmd, "force-patch-prefixes");
+        List<String> forceMinorPrefixes = getCommaSeparatedOptionValue(cmd, "force-minor-prefixes");
+
         if (!branchesToStipulateReleaseVersionsFor.isEmpty()) {
             if (versionHint.isEmpty()) {
                 throw new IllegalArgumentException("version-hint is required when using suggest-releases");
@@ -62,7 +60,8 @@ public final class Main {
         suggesterOptions.setGitRepoPath(path);
         suggesterOptions.setBranchesToInferReleaseVersionsFor(branchesToStipulateReleaseVersionsFor);
         suggesterOptions.setVersionHint(versionHint);
-
+        suggesterOptions.setForcePatchIncrementForBranchPrefixes(forcePatchPrefixes);
+        suggesterOptions.setForceMinorIncrementForBranchPrefixes(forceMinorPrefixes);
         return suggesterOptions;
     }
 
@@ -81,6 +80,14 @@ public final class Main {
                 + "- required when using --suggest-releases")
             .hasArg()
             .build());
+        options.addOption(Option.builder().longOpt("force-patch-prefixes")
+            .desc("comma separated list for branch prefixes which will force increase of the versions patch segment"
+                + ", leave empty or unused to disable. Only usable together with --suggest-releases")
+            .hasArg().build());
+        options.addOption(Option.builder().longOpt("force-minor-prefixes")
+            .desc("comma separated list for branch prefixes which will force increase of the versions minor segment"
+                + ", leave empty or unused to disable. Only usable together with --suggest-releases")
+            .hasArg().build());
         return options;
     }
 
@@ -89,5 +96,16 @@ public final class Main {
         HelpFormatter formatter = new HelpFormatter();
         formatter.setWidth(HELP_WIDTH);
         formatter.printHelp("java -jar aurora-git-version-cli.jar", options);
+    }
+
+    private static List<String> getCommaSeparatedOptionValue(CommandLine cmd, String opt) {
+        return commaSeparatedStringToList(cmd.getOptionValue(opt, ""));
+    }
+
+    private static List<String> commaSeparatedStringToList(String commaSeparatedString) {
+        return Arrays.stream(commaSeparatedString.split(","))
+            .map(String::trim)
+            .filter(s -> !s.isEmpty())
+            .collect(Collectors.toList());
     }
 }
