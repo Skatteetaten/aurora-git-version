@@ -50,7 +50,12 @@ public class SuggesterOptions {
     private List<String> branchesToUseTagsAsVersionsFor = emptyList();
 
     /**
-     * TODO: Document
+     * Version hint indicating current release track.
+     * Can contain non numeric information, as in 1.0-SNAPSHOT normally used by Maven.
+     * <p>
+     * Examples: <br>
+     *  1   - increment MINOR to next minor version for given major track 1.x
+     *  1.2 - increment PATCH to next patch version for given minor track 1.2.x
      */
     private String versionHint = null;
 

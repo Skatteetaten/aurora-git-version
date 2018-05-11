@@ -2,6 +2,7 @@ package no.skatteetaten.aurora.version.suggest;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public final class ReleaseVersionEvaluator {
 
@@ -13,37 +14,46 @@ public final class ReleaseVersionEvaluator {
      * According to http://semver.org/
      * <p>
      * If none of the forced update conditions apply, the number of version segments in the current
-     * SNAPSHOT version will dictate which segment to increment.<br>
+     * version hint will dictate which segment to increment. <br>
+     * All non numeric text is striped from the version hint, allowing version hint as 1.0-SNAPSHOT <br>
      *   Examples:<br>
+     *     1.0          - Increment PATCH to next patch version<br>
      *     1.0-SNAPSHOT - Increment PATCH to next patch version<br>
-     *     1-SNAPSHOT   - Increment MINOR to next minor version<br>
+     *     1            - Increment MINOR to next minor version<br>
      */
     public static VersionSegment findVersionSegmentToIncrement(
-        String currentVersionAsString,
+        String versionHintAsString,
         Optional<String> originatingBranchName,
         List<String> forcePatchIncrementForBranchPrefixes,
         List<String> forceMinorIncrementForBranchPrefixes) {
 
-        VersionNumber currentVersion = VersionNumber.parse(currentVersionAsString);
+        VersionNumber versionHint = VersionNumber.parseVersionHint(versionHintAsString);
 
-        if (prefixListContainsBranchName(originatingBranchName, forceMinorIncrementForBranchPrefixes)) {
+        if (prefixListContainsBranchNameCaseInsensitive(originatingBranchName, forceMinorIncrementForBranchPrefixes)) {
             return VersionSegment.MINOR;
         }
-        if (prefixListContainsBranchName(originatingBranchName, forcePatchIncrementForBranchPrefixes)) {
+        if (prefixListContainsBranchNameCaseInsensitive(originatingBranchName, forcePatchIncrementForBranchPrefixes)) {
             return VersionSegment.PATCH;
         }
 
-        if (currentVersion.getVersionNumberSegments().size() == 1) {
+        if (versionHint.getVersionNumberSegments().size() == 1) {
             return VersionSegment.MINOR;
         } else {
             return VersionSegment.PATCH;
         }
     }
 
-    private static boolean prefixListContainsBranchName(Optional<String> optionalBranchName, List<String> prefixList) {
+    private static boolean prefixListContainsBranchNameCaseInsensitive(
+        Optional<String> optionalBranchName, List<String> prefixList) {
+
+        List<String> lowerCasedPrefixList = prefixList.stream()
+            .map(String::toLowerCase)
+            .collect(Collectors.toList());
+
         return optionalBranchName
+            .map(String::toLowerCase)
             .flatMap(branchName ->
-                prefixList.stream()
+                lowerCasedPrefixList.stream()
                     .filter(branchName::startsWith)
                     .findFirst())
             .isPresent();

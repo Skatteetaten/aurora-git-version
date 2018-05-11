@@ -17,10 +17,13 @@ class ReleaseVersionEvaluatorTest extends Specification {
       versionSegmentToIncrement == expectedVersionSegment
     where:
       expectedVersionSegment | versionHint
+      VersionSegment.PATCH   | "1.2.3"
       VersionSegment.PATCH   | "1.0.0-SNAPSHOT"
       VersionSegment.PATCH   | "1.0.1-SNAPSHOT"
+      VersionSegment.PATCH   | "1.2"
       VersionSegment.PATCH   | "1.0-SNAPSHOT"
       VersionSegment.PATCH   | "1.1-SNAPSHOT"
+      VersionSegment.MINOR   | "1"
       VersionSegment.MINOR   | "1-SNAPSHOT"
   }
 
@@ -44,6 +47,8 @@ class ReleaseVersionEvaluatorTest extends Specification {
       VersionSegment.MINOR   | "1.0.1-SNAPSHOT" | "feature/some"        | []                     | ["feature"]
       VersionSegment.MINOR   | "1.0-SNAPSHOT"   | "feature/some"        | ["feature"]            | ["feature"]
       VersionSegment.PATCH   | "1.0-SNAPSHOT"   | "bugfix/some"         | ["bugfix", "hotfix"]   | ["feature"]
+      VersionSegment.PATCH   | "1.0-SNAPSHOT"   | "bugfix/some"         | ["BUGFIX", "hotfix"]   | ["feature"]
+      VersionSegment.PATCH   | "1.0-SNAPSHOT"   | "BUGFIX/some"         | ["bugfix", "hotfix"]   | ["feature"]
 
   }
 

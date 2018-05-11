@@ -6,58 +6,77 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import no.skatteetaten.aurora.version.utils.Integers;
 
 /**
- * This class is a Java implementation of Tommy Bø's original implementation in Groovy that could be found in the
- * aurora-cd maven plugin. It has been reimplemented in Java without changing any of the core logic.
+ * Functionality for parsing, validating and manipulating semantic version numbers
  */
 public final class VersionNumber implements Comparable<VersionNumber> {
 
-    public static final String SNAPSHOT_NOTATION = "-SNAPSHOT";
-
     private List<String> versionNumberSegments;
+    private boolean isSemanticVersion;
 
-    private boolean isSnapshot;
-
-    private VersionNumber(List<String> versionNumberSegments, boolean isSnapshot) {
-
+    private VersionNumber(List<String> versionNumberSegments, boolean isSemanticVersion) {
         this.versionNumberSegments = versionNumberSegments;
-        this.isSnapshot = isSnapshot;
+        this.isSemanticVersion = isSemanticVersion;
     }
 
-    public static boolean isValid(String versionString) {
+    /**
+     * Parses the given string and builds a version number object.
+     * All non-number parts of the version is stripped, this to support any snapshot syntax.
+     * The flag 'isSemanticVersion' reveals if the number segments are from a pure semantic version or not.
+     */
+    public static VersionNumber parse(String versionString) {
+        boolean forceNonSemanticVersion = false;
+        return parseVersionStringHelper(versionString, forceNonSemanticVersion);
+    }
 
+    /**
+     * A version hint should never be treated as a pure semantic version, even though it might look like one.
+     * Parses the given string and builds a version number object with isSemanticVersion = false.
+     */
+    public static VersionNumber parseVersionHint(String versionString) {
+        boolean forceNonSemanticVersion = true;
+        return parseVersionStringHelper(versionString, forceNonSemanticVersion);
+    }
+
+    private static VersionNumber parseVersionStringHelper(String versionString, boolean forceNonSemanticVersion) {
         if (versionString == null) {
             throw new IllegalArgumentException("version string cannot be null");
         }
-        String pattern = versionString.contains(SNAPSHOT_NOTATION)
-            ? "\\d+(.\\d+)*(" + SNAPSHOT_NOTATION + ")?"
-            : "^(\\d+\\.)(\\d+\\.)(\\d+)$";
-        Pattern r = Pattern.compile(pattern);
-        Matcher m = r.matcher(versionString);
-        return m.matches();
+        boolean isSemanticVersion = forceNonSemanticVersion ? false : isValidSemanticVersion(versionString);
+        List<String> segments = Arrays.stream(versionString.split("\\."))
+            .flatMap(VersionNumber::handleAndFilterVersionSegment)
+            .collect(Collectors.toList());
+        if (segments.isEmpty()) {
+            throw new IllegalArgumentException("No version number segments found in " + versionString);
+        }
+        return new VersionNumber(segments, isSemanticVersion);
     }
 
-    public static VersionNumber parse(String versionString) {
+    private static boolean isValidSemanticVersion(String versionString) {
+        Pattern pattern = Pattern.compile("^\\d+\\.\\d+\\.\\d+$");
+        Matcher matcher = pattern.matcher(versionString);
+        return matcher.matches();
+    }
 
-        if (!isValid(versionString)) {
-            throw new IllegalArgumentException(
-                String.format("the version number %s is not well formatted", versionString));
+    private static Stream<String> handleAndFilterVersionSegment(String segment) {
+        Pattern pattern = Pattern.compile("^(\\d+).*?$");
+        Matcher matcher = pattern.matcher(segment);
+        if (matcher.matches()) {
+            return Stream.of(matcher.group(1));
         }
-        List<String> segments = Arrays.asList(versionString.replaceAll(SNAPSHOT_NOTATION + "$", "").split("\\."));
-        return new VersionNumber(segments, versionString.endsWith(SNAPSHOT_NOTATION));
+        return Stream.empty();
     }
 
     public VersionNumber shorten(int newLength) {
-
-        return new VersionNumber(versionNumberSegments.subList(0, newLength), isSnapshot);
+        return new VersionNumber(versionNumberSegments.subList(0, newLength), isSemanticVersion);
     }
 
     public boolean canBeUsedWhenDeterminingReleaseVersion(VersionNumber other) {
-
-        if (other.isSnapshot || !this.isSnapshot) {
+        if (!other.isSemanticVersion || this.isSemanticVersion) {
             return false;
         }
         if (other.versionNumberSegments.size() > this.versionNumberSegments.size()) {
@@ -94,12 +113,11 @@ public final class VersionNumber implements Comparable<VersionNumber> {
     }
 
     public VersionNumber incrementPatchSegment() {
-
         List<String> newSegments = new ArrayList<>(versionNumberSegments.subList(0, versionNumberSegments.size() - 1));
         Integer lastElement = Integer.parseInt(versionNumberSegments.get(versionNumberSegments.size() - 1));
         lastElement += 1;
         newSegments.add(lastElement.toString());
-        return new VersionNumber(newSegments, isSnapshot);
+        return new VersionNumber(newSegments, isSemanticVersion);
     }
 
     public VersionNumber incrementMinorSegment() {
@@ -108,7 +126,7 @@ public final class VersionNumber implements Comparable<VersionNumber> {
         minorElement += 1;
         newSegments.set(1, minorElement.toString());
         newSegments.set(2, "0");
-        return new VersionNumber(newSegments, isSnapshot);
+        return new VersionNumber(newSegments, isSemanticVersion);
     }
 
     public List<String> getVersionNumberSegments() {
@@ -116,9 +134,8 @@ public final class VersionNumber implements Comparable<VersionNumber> {
         return versionNumberSegments;
     }
 
-    public boolean isSnapshot() {
-
-        return isSnapshot;
+    public boolean isSemanticVersion() {
+        return isSemanticVersion;
     }
 
     @Override
@@ -131,13 +148,13 @@ public final class VersionNumber implements Comparable<VersionNumber> {
             Integer that = Integer.parseInt(other.versionNumberSegments.get(i));
             versionComparison.add(me.compareTo(that));
         }
-        versionComparison.add(Boolean.compare(this.isSnapshot, other.isSnapshot));
+        versionComparison.add(Boolean.compare(other.isSemanticVersion, this.isSemanticVersion));
         versionComparison.add(Integer.compare(this.versionNumberSegments.size(), other.versionNumberSegments.size()));
         return versionComparison.stream().filter(it -> it != 0).findFirst().orElse(0);
     }
 
     @Override
     public String toString() {
-        return versionNumberSegments.stream().collect(Collectors.joining(".")) + (isSnapshot ? SNAPSHOT_NOTATION : "");
+        return versionNumberSegments.stream().collect(Collectors.joining("."));
     }
 }

@@ -20,33 +20,44 @@ public final class ReleaseVersionIncrementer {
         String currentVersionAsString,
         List<String> existingVersions) {
 
-        VersionNumber currentVersion = VersionNumber.parse(currentVersionAsString);
+        VersionNumber versionHint = VersionNumber.parseVersionHint(currentVersionAsString);
 
         List<VersionNumber> orderedListOfVersions = existingVersions.stream()
-            .filter(VersionNumber::isValid)
             .map(VersionNumber::parse)
             .sorted()
             .collect(Collectors.toList());
 
         Optional<VersionNumber> eligibleVersion = orderedListOfVersions.stream()
-            .filter(currentVersion::canBeUsedWhenDeterminingReleaseVersion)
+            .filter(versionHint::canBeUsedWhenDeterminingReleaseVersion)
             .reduce((first, second) -> second);
 
         Optional<VersionNumber> lastRelease = orderedListOfVersions.stream()
-            .filter(versionNumber -> !versionNumber.isSnapshot())
+            .filter(VersionNumber::isSemanticVersion)
             .reduce((first, second) -> second);
 
         if (!eligibleVersion.isPresent()) {
-            return currentVersion.unlockVersion();
+            return versionHint.unlockVersion();
+        }
+
+        if (useVersionHintAsIs(versionHint, eligibleVersion.get())) {
+            return versionHint.unlockVersion();
         }
 
         if (VersionSegment.MINOR.equals(versionSegmentToIncrement)) {
             return lastRelease
                 .map(VersionNumber::incrementMinorSegment)
-                .orElse(currentVersion.unlockVersion());
+                .orElse(versionHint.unlockVersion());
         }
 
         return eligibleVersion.get().incrementPatchSegment();
+    }
+
+    private static boolean useVersionHintAsIs(VersionNumber versionHint, VersionNumber eligibleVersion) {
+        if (versionHint.getVersionNumberSegments().size() != 3) {
+            return false;
+        }
+        VersionNumber versionHintAsSemanticVersion = VersionNumber.parse(versionHint.toString());
+        return versionHintAsSemanticVersion.compareTo(eligibleVersion) > 0;
     }
 
 }
