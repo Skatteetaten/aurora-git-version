@@ -21,6 +21,12 @@ class ReleaseVersionIncrementerTest extends Specification {
 
     where:
       expectedVersion | versionSegmentToIncrement | versionHint
+      "1.0.10"        | VersionSegment.PATCH      | "1.0.10" // start from a non existing version
+      "1.0.3"         | VersionSegment.PATCH      | "1.0.2"
+      "1.0.3"         | VersionSegment.PATCH      | "1.0"
+      "1.1.2"         | VersionSegment.PATCH      | "1.1"
+      "1.1.2"         | VersionSegment.PATCH      | "1.1.x"        // same as '1.1'
+      "1.1.2"         | VersionSegment.PATCH      | "1.1-SNAPSHOT" // same as '1.1'
       "1.0.3"         | VersionSegment.PATCH      | "1.0-SNAPSHOT"
       "1.1.2"         | VersionSegment.PATCH      | "1.1-SNAPSHOT"
       "1.2.3"         | VersionSegment.PATCH      | "1.2-SNAPSHOT"
@@ -30,6 +36,9 @@ class ReleaseVersionIncrementerTest extends Specification {
       "1.3.1"         | VersionSegment.PATCH      | "1-SNAPSHOT"
       "2.0.0"         | VersionSegment.PATCH      | "2-SNAPSHOT"
       "3.0.0"         | VersionSegment.PATCH      | "3-SNAPSHOT"
+      "1.4.0"         | VersionSegment.MINOR      | "1.2.2"
+      "1.2.10"        | VersionSegment.MINOR      | "1.2.10"
+      "1.5.10"        | VersionSegment.MINOR      | "1.5.10"
       "1.4.0"         | VersionSegment.MINOR      | "1.0-SNAPSHOT"
       "1.4.0"         | VersionSegment.MINOR      | "1.1-SNAPSHOT"
       "1.4.0"         | VersionSegment.MINOR      | "1.2-SNAPSHOT"

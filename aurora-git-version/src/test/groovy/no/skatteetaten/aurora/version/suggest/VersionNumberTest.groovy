@@ -13,14 +13,13 @@ class VersionNumberTest extends Specification {
       versionNumber.toString() == "1.2.3"
   }
 
-  def "version number with two adjacent periods is on wrong format"() {
+  def "version number with two adjacent periods is not a semantic version"() {
     given:
       def version = "1..2"
     when:
       def versionNumber = VersionNumber.parse(version)
     then:
-      IllegalArgumentException exception = thrown();
-      exception.message == "the version number 1..2 is not well formatted"
+      versionNumber.isSemanticVersion() == false
   }
 
   def "Version number elements support multiple digits"() {
@@ -32,23 +31,14 @@ class VersionNumberTest extends Specification {
       versionNumber.toString() == "1234567.2345678.2322"
   }
 
-  def "Version number support snapshots"() {
+  def "Version number support Maven snapshot syntax"() {
     given:
       def version = "1.2-SNAPSHOT"
     when:
       def versionNumber = VersionNumber.parse(version)
     then:
-      versionNumber.isSnapshot == true
-      versionNumber.toString() == "1.2-SNAPSHOT"
-  }
-
-  def "Version number without snapshot-notation is not marked as snapshot"() {
-    given:
-      def version = "1.2.0"
-    when:
-      def versionNumber = VersionNumber.parse(version)
-    then:
-      versionNumber.isSnapshot == false
+      versionNumber.isSemanticVersion() == false
+      versionNumber.toString() == "1.2"
   }
 
   def "Version numbers are naturally sorted by their individual segments"() {
@@ -62,7 +52,7 @@ class VersionNumberTest extends Specification {
     when:
       def sortedVersions = unsortedVersions.toSorted()
     then:
-      sortedVersions.collect { it.toString() } == ["1.8.9", "8.2.0", "8.2.8", "8.2-SNAPSHOT", "10.0.1"]
+      sortedVersions.collect { it.toString() } == ["1.8.9", "8.2.0", "8.2.8", "8.2", "10.0.1"]
   }
 
   def "Snapshot versions are considered greater than equal release"() {
@@ -91,7 +81,8 @@ class VersionNumberTest extends Specification {
     when:
       def shortenedVerison = originalVersion.shorten(2);
     then:
-      shortenedVerison.toString() == "3.3-SNAPSHOT"
+      shortenedVerison.isSemanticVersion() == false
+      shortenedVerison.toString() == "3.3"
   }
 
   def "A version number with the same leading version numbers can be used when determining release version"() {
@@ -129,7 +120,8 @@ class VersionNumberTest extends Specification {
     when:
       def increasedVersion = version.incrementPatchSegment();
     then:
-      increasedVersion.toString() == "3.3-SNAPSHOT";
+      increasedVersion.toString() == "3.3";
+      increasedVersion.isSemanticVersion() == false
   }
 
   def "Version numbers is extended with another segment with value 0 when unlocked"() {
@@ -145,31 +137,39 @@ class VersionNumberTest extends Specification {
       "3-SNAPSHOT"   | "3.0.0"
   }
 
-  def "example of valid version numbers"() {
+  def "Version hint is always treated as non semantic version"() {
+    when:
+      def versionHint = VersionNumber.parseVersionHint(version)
+    then:
+      versionHint.toString() == parsedVersionHintAsString
+      versionHint.semanticVersion == false
+    where:
+      version          | parsedVersionHintAsString
+      "1"              | "1"
+      "1.1"            | "1.1"
+      "1.0.1"          | "1.0.1"
+      "1-SNAPSHOT"     | "1"
+      "1.2-SNAPSHOT"   | "1.2"
+      "1.2.3-SNAPSHOT" | "1.2.3"
+  }
+
+  def "example of valid semantic version numbers"() {
     given:
       def versions = [
           "1.0.1",
-          "2.3.4-SNAPSHOT",
           "1.1.2",
           "1.1.1",
           "123456789.123456789.123456789",
           "123456789.123456789.123456789",
-          "18.19.20",
-          "1.2-SNAPSHOT"
+          "18.19.20"
       ]
     when:
-      def versionNumbers = versions.collect {
-        try {
-          VersionNumber.parse(it);
-        } catch (IllegalArgumentException x) {
-          println x.message; throw x
-        }
-      }
+      def versionNumbers = versions.collect { VersionNumber.parse(it) }
     then:
-      notThrown IllegalArgumentException
+      versionNumbers.findAll { it.semanticVersion }.size() == versions.size();
   }
 
-  def "example of invalid version numbers"() {
+  def "example of non semantic version numbers"() {
     given:
       def versions = [
           ".1",
@@ -181,19 +181,13 @@ class VersionNumberTest extends Specification {
           "123456789..123456789..123456789",
           "1..1.1..1",
           "123456789..123456789.123456789..123456789",
-          "12.0.0.1"
+          "12.0.0.1",
+          "1.2-SNAPSHOT"
       ]
     when:
-      def versionNumbers = versions.collect {
-        try {
-          VersionNumber.parse(it);
-        } catch (IllegalArgumentException) {
-          return null
-        }
-      }
+      def versionNumbers = versions.collect { VersionNumber.parse(it) }
     then:
-      println versionNumbers.findAll { it }.join()
-      versionNumbers.findAll { it }.size() == 0
+      versionNumbers.findAll { it.semanticVersion }.size() == 0
   }
 
 }
