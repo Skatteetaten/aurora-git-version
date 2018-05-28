@@ -12,7 +12,7 @@ class ReleaseVersionTest extends Specification {
   @Unroll
   def "shall suggest version #expectedVersion for version #versionHint"() {
     given:
-      def existingVersions = ["1.1.0", "1.1.1", "1.1.2-SNAPSHOT", "1.2.2", "1.2.1", "1.2.0", "1.3.0"]
+      def existingVersions = ["2.2.2", "3.0.0", "1.1.0", "1.1.1", "1.1.2-SNAPSHOT", "1.2.2", "1.2.1", "1.2.0", "1.3.0"]
 
     when:
       def versionSegmentToIncrement = ReleaseVersionEvaluator.findVersionSegmentToIncrement(
@@ -38,13 +38,15 @@ class ReleaseVersionTest extends Specification {
       "1.1.2"         | "1.1-SNAPSHOT"
       "1.4.0"         | "1.4-SNAPSHOT"
       "1.4.0"         | "1-SNAPSHOT"
-      "2.0.0"         | "2-SNAPSHOT"
+      "2.3.0"         | "2"
+      "3.1.0"         | "3"
+      "4.0.0"         | "4"
   }
 
   @Unroll
   def "shall suggest version #expectedVersion for version #versionHint for #originatingBranchName, #forcePatchIncrementFor and #forceMinorIncrementFor"() {
     given:
-      def existingVersions = ["1.1.0", "1.1.1", "1.1.2-SNAPSHOT", "1.2.2", "1.2.1", "1.2.0", "1.3.0"]
+      def existingVersions = ["2.2.2", "3.0.0", "1.1.0", "1.1.1", "1.1.2-SNAPSHOT", "1.2.2", "1.2.1", "1.2.0", "1.3.0"]
 
     when:
       def versionSegmentToIncrement = ReleaseVersionEvaluator.findVersionSegmentToIncrement(
@@ -63,14 +65,18 @@ class ReleaseVersionTest extends Specification {
 
     where:
       expectedVersion | versionHint    | originatingBranchName | forcePatchIncrementFor | forceMinorIncrementFor
-      "1.1.2"         | "1.1-SNAPSHOT" | "feature/some"        | ["feature"]            | []
-      "1.4.0"         | "1.1-SNAPSHOT" | "feature/some"        | []                     | ["feature"]
-      "1.5.0"         | "1.5-SNAPSHOT" | "feature/some"        | ["feature"]            | []
-      "1.5.0"         | "1.5-SNAPSHOT" | "feature/some"        | []                     | ["feature"]
-      "1.3.1"         | "1-SNAPSHOT"   | "feature/some"        | ["feature"]            | []
-      "1.4.0"         | "1-SNAPSHOT"   | "feature/some"        | []                     | ["feature"]
-      "2.0.0"         | "2-SNAPSHOT"   | "feature/some"        | ["feature"]            | []
-      "2.0.0"         | "2-SNAPSHOT"   | "feature/some"        | []                     | ["feature"]
+      "1.1.2"         | "1.1-SNAPSHOT" | "branch/some"         | ["branch"]             | []
+      "1.4.0"         | "1.1-SNAPSHOT" | "branch/some"         | []                     | ["branch"]
+      "1.5.0"         | "1.5-SNAPSHOT" | "branch/some"         | ["branch"]             | []
+      "1.5.0"         | "1.5-SNAPSHOT" | "branch/some"         | []                     | ["branch"]
+      "1.3.1"         | "1-SNAPSHOT"   | "branch/some"         | ["branch"]             | []
+      "1.4.0"         | "1-SNAPSHOT"   | "branch/some"         | []                     | ["branch"]
+      "2.2.3"         | "2-SNAPSHOT"   | "branch/some"         | ["branch"]             | []
+      "2.3.0"         | "2-SNAPSHOT"   | "branch/some"         | []                     | ["branch"]
+      "3.0.1"         | "3-SNAPSHOT"   | "branch/some"         | ["branch"]             | []
+      "3.1.0"         | "3-SNAPSHOT"   | "branch/some"         | []                     | ["branch"]
+      "4.0.0"         | "4-SNAPSHOT"   | "branch/some"         | ["branch"]             | []
+      "4.0.0"         | "4-SNAPSHOT"   | "branch/some"         | []                     | ["branch"]
 
   }
 

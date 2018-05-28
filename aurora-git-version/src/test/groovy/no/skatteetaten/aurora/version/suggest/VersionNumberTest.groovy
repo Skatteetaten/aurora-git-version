@@ -85,16 +85,6 @@ class VersionNumberTest extends Specification {
       shortenedVerison.toString() == "3.3"
   }
 
-  def "A version number with the same leading version numbers can be used when determining release version"() {
-    given:
-      def releasedVersion = VersionNumber.parse("3.3.1");
-      def developmentVersion = VersionNumber.parse("3.3-SNAPSHOT");
-    when:
-      def similar = developmentVersion.canBeUsedWhenDeterminingReleaseVersion(releasedVersion);
-    then:
-      similar == true
-  }
-
   def "Shorter version numbers autopads length when adapting to longer version number"() {
     given:
       def releasedVersion = VersionNumber.parse("3.4.0");
