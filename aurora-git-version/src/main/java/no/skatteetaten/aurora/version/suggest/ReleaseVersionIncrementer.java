@@ -28,13 +28,13 @@ public final class ReleaseVersionIncrementer {
                 isVersionTagPartOfReleaseTrack(versionSegmentToIncrement, versionHint, versionTag))
             .reduce((first, second) -> second);
 
-        // First version tag in a new release track
+        // To handle first version tag in a new release track
         if (!latestTagInCurrentReleaseTrack.isPresent()) {
             return versionHint.unlockVersion();
         }
 
         // To handle version bumping within the same release track
-        if (isVersionHintGraterThanVersionTag(versionHint, latestTagInCurrentReleaseTrack.get())) {
+        if (isVersionHintGreaterThanVersionTag(versionHint, latestTagInCurrentReleaseTrack.get())) {
             return versionHint.unlockVersion();
         }
 
@@ -72,7 +72,7 @@ public final class ReleaseVersionIncrementer {
         return true;
     }
 
-    private static boolean isVersionHintGraterThanVersionTag(VersionNumber versionHint, VersionNumber versionTag) {
+    private static boolean isVersionHintGreaterThanVersionTag(VersionNumber versionHint, VersionNumber versionTag) {
         VersionNumber versionHintAsSemanticVersion = VersionNumber.parse(versionHint.unlockVersion().toString());
         return versionHintAsSemanticVersion.compareTo(versionTag) > 0;
     }
