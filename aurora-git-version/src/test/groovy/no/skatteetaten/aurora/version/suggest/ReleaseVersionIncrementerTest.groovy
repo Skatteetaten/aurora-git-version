@@ -8,8 +8,8 @@ class ReleaseVersionIncrementerTest extends Specification {
   @Unroll
   def "shall suggest version #expectedVersion for segment #versionSegmentToIncrement and version #versionHint"() {
     given:
-      def existingVersions = ["2.1.2", "2.3.3", "3.0.0", "1.0.0", "1.0.1", "1.0.2", "1.1.2-SNAPSHOT",
-                              "1.1.1", "1.1.0", "1.2.0", "1.2.1", "1.2.2", "1.2.3-SNAPSHOT", "1.3.0"]
+      def existingVersions = ["2.1.2", "2.3.3", "3.0.0", "1.0.0", "1.0.1", "1.0.2",
+                              "1.1.1", "1.1.0", "1.2.0", "1.2.1", "1.2.2", "1.3.0"]
 
     when:
       def inferredVersion = ReleaseVersionIncrementer.suggestNextReleaseVersion(
@@ -26,35 +26,33 @@ class ReleaseVersionIncrementerTest extends Specification {
       "1.0.3"         | VersionSegment.PATCH      | "1.0.2"
       "1.0.3"         | VersionSegment.PATCH      | "1.0"
       "1.1.2"         | VersionSegment.PATCH      | "1.1"
-      "1.1.2"         | VersionSegment.PATCH      | "1.1.x"        // same as '1.1'
-      "1.1.2"         | VersionSegment.PATCH      | "1.1-SNAPSHOT" // same as '1.1'
-      "1.0.3"         | VersionSegment.PATCH      | "1.0-SNAPSHOT"
-      "1.1.2"         | VersionSegment.PATCH      | "1.1-SNAPSHOT"
-      "1.2.3"         | VersionSegment.PATCH      | "1.2-SNAPSHOT"
-      "1.3.1"         | VersionSegment.PATCH      | "1.3-SNAPSHOT"
-      "1.4.0"         | VersionSegment.PATCH      | "1.4-SNAPSHOT"
-      "1.5.0"         | VersionSegment.PATCH      | "1.5-SNAPSHOT"
-      "1.3.1"         | VersionSegment.PATCH      | "1-SNAPSHOT"
-      "2.3.4"         | VersionSegment.PATCH      | "2-SNAPSHOT"
-      "3.0.1"         | VersionSegment.PATCH      | "3-SNAPSHOT"
-      "4.0.0"         | VersionSegment.PATCH      | "4-SNAPSHOT"
+      "1.0.3"         | VersionSegment.PATCH      | "1.0"
+      "1.1.2"         | VersionSegment.PATCH      | "1.1"
+      "1.2.3"         | VersionSegment.PATCH      | "1.2"
+      "1.3.1"         | VersionSegment.PATCH      | "1.3"
+      "1.4.0"         | VersionSegment.PATCH      | "1.4"
+      "1.5.0"         | VersionSegment.PATCH      | "1.5"
+      "1.3.1"         | VersionSegment.PATCH      | "1"
+      "2.3.4"         | VersionSegment.PATCH      | "2"
+      "3.0.1"         | VersionSegment.PATCH      | "3"
+      "4.0.0"         | VersionSegment.PATCH      | "4"
       "1.4.0"         | VersionSegment.MINOR      | "1.2.2"
       "1.4.0"         | VersionSegment.MINOR      | "1.2.10"
       "1.5.10"        | VersionSegment.MINOR      | "1.5.10"
-      "1.4.0"         | VersionSegment.MINOR      | "1.0-SNAPSHOT"
-      "1.4.0"         | VersionSegment.MINOR      | "1.1-SNAPSHOT"
-      "1.4.0"         | VersionSegment.MINOR      | "1.2-SNAPSHOT"
-      "1.4.0"         | VersionSegment.MINOR      | "1.3-SNAPSHOT"
-      "1.4.0"         | VersionSegment.MINOR      | "1.4-SNAPSHOT"
-      "1.5.0"         | VersionSegment.MINOR      | "1.5-SNAPSHOT"
-      "1.4.0"         | VersionSegment.MINOR      | "1-SNAPSHOT"
-      "1.4.0"         | VersionSegment.MINOR      | "1.2-SNAPSHOT"
-      "2.4.0"         | VersionSegment.MINOR      | "2-SNAPSHOT"
-      "2.4.0"         | VersionSegment.MINOR      | "2.2-SNAPSHOT"
-      "3.1.0"         | VersionSegment.MINOR      | "3-SNAPSHOT"
-      "3.1.0"         | VersionSegment.MINOR      | "3.0-SNAPSHOT"
-      "4.0.0"         | VersionSegment.MINOR      | "4-SNAPSHOT"
-      "4.0.0"         | VersionSegment.MINOR      | "4.0-SNAPSHOT"
+      "1.4.0"         | VersionSegment.MINOR      | "1.0"
+      "1.4.0"         | VersionSegment.MINOR      | "1.1"
+      "1.4.0"         | VersionSegment.MINOR      | "1.2"
+      "1.4.0"         | VersionSegment.MINOR      | "1.3"
+      "1.4.0"         | VersionSegment.MINOR      | "1.4"
+      "1.5.0"         | VersionSegment.MINOR      | "1.5"
+      "1.4.0"         | VersionSegment.MINOR      | "1"
+      "1.4.0"         | VersionSegment.MINOR      | "1.2"
+      "2.4.0"         | VersionSegment.MINOR      | "2"
+      "2.4.0"         | VersionSegment.MINOR      | "2.2"
+      "3.1.0"         | VersionSegment.MINOR      | "3"
+      "3.1.0"         | VersionSegment.MINOR      | "3.0"
+      "4.0.0"         | VersionSegment.MINOR      | "4"
+      "4.0.0"         | VersionSegment.MINOR      | "4.0"
   }
 
   @Unroll
@@ -73,23 +71,38 @@ class ReleaseVersionIncrementerTest extends Specification {
 
     where:
       expectedVersion | versionSegmentToIncrement | versionHint
-      "0.0.0"         | VersionSegment.PATCH      | "0-SNAPSHOT"
-      "0.0.0"         | VersionSegment.PATCH      | "0.0-SNAPSHOT"
-      "1.0.0"         | VersionSegment.PATCH      | "1-SNAPSHOT"
-      "4.0.0"         | VersionSegment.PATCH      | "4-SNAPSHOT"
-      "1.0.0"         | VersionSegment.PATCH      | "1.0-SNAPSHOT"
-      "1.4.0"         | VersionSegment.PATCH      | "1.4-SNAPSHOT"
-      "1.1.1"         | VersionSegment.PATCH      | "1.1.1-SNAPSHOT"
-      "1.4.4"         | VersionSegment.PATCH      | "1.4.4-SNAPSHOT"
-      "0.0.0"         | VersionSegment.MINOR      | "0-SNAPSHOT"
-      "1.0.0"         | VersionSegment.MINOR      | "1-SNAPSHOT"
-      "0.0.0"         | VersionSegment.MINOR      | "0.0-SNAPSHOT"
-      "1.0.0"         | VersionSegment.MINOR      | "1-SNAPSHOT"
-      "4.0.0"         | VersionSegment.MINOR      | "4-SNAPSHOT"
-      "1.0.0"         | VersionSegment.MINOR      | "1.0-SNAPSHOT"
-      "1.4.0"         | VersionSegment.MINOR      | "1.4-SNAPSHOT"
-      "1.1.1"         | VersionSegment.MINOR      | "1.1.1-SNAPSHOT"
-      "1.4.4"         | VersionSegment.MINOR      | "1.4.4-SNAPSHOT"
+      "0.0.0"         | VersionSegment.PATCH      | "0"
+      "0.0.0"         | VersionSegment.PATCH      | "0.0"
+      "1.0.0"         | VersionSegment.PATCH      | "1"
+      "4.0.0"         | VersionSegment.PATCH      | "4"
+      "1.0.0"         | VersionSegment.PATCH      | "1.0"
+      "1.4.0"         | VersionSegment.PATCH      | "1.4"
+      "1.1.1"         | VersionSegment.PATCH      | "1.1.1"
+      "1.4.4"         | VersionSegment.PATCH      | "1.4.4"
+      "0.0.0"         | VersionSegment.MINOR      | "0"
+      "1.0.0"         | VersionSegment.MINOR      | "1"
+      "0.0.0"         | VersionSegment.MINOR      | "0.0"
+      "1.0.0"         | VersionSegment.MINOR      | "1"
+      "4.0.0"         | VersionSegment.MINOR      | "4"
+      "1.0.0"         | VersionSegment.MINOR      | "1.0"
+      "1.4.0"         | VersionSegment.MINOR      | "1.4"
+      "1.1.1"         | VersionSegment.MINOR      | "1.1.1"
+      "1.4.4"         | VersionSegment.MINOR      | "1.4.4"
+  }
+
+  def "shall ignore non semantic version tags when determining which version number to suggest"() {
+    given:
+      def existingVersions = ["1.1", "1.0.0", "1.1.0.202", "1.1.0.ad4ea2f35", "1.1.0-SNAPSHOT"]
+      def versionHint = "1"
+
+    when:
+      def inferredVersion = ReleaseVersionIncrementer.suggestNextReleaseVersion(
+          VersionSegment.MINOR,
+          versionHint,
+          existingVersions)
+
+    then:
+      inferredVersion.toString() == "1.1.0"
 
   }
 

@@ -15,11 +15,10 @@ public final class ReleaseVersionEvaluator {
      * <p>
      * If none of the forced update conditions apply, the number of version segments in the current
      * version hint will dictate which segment to increment. <br>
-     * All non numeric text is striped from the version hint, allowing version hint as 1.0-SNAPSHOT <br>
+     * <p>
      *   Examples:<br>
-     *     1.0          - Increment PATCH to next patch version<br>
-     *     1.0-SNAPSHOT - Increment PATCH to next patch version<br>
-     *     1            - Increment MINOR to next minor version<br>
+     *     1.0 - Increment PATCH to next patch version<br>
+     *     1   - Increment MINOR to next minor version<br>
      */
     public static VersionSegment findVersionSegmentToIncrement(
         String versionHintAsString,
