@@ -2,7 +2,6 @@ package no.skatteetaten.aurora.version.suggest;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public final class ReleaseVersionIncrementer {
 
@@ -17,47 +16,65 @@ public final class ReleaseVersionIncrementer {
      */
     public static VersionNumber suggestNextReleaseVersion(
         VersionSegment versionSegmentToIncrement,
-        String currentVersionAsString,
+        String versionHintAsString,
         List<String> existingVersions) {
 
-        VersionNumber versionHint = VersionNumber.parseVersionHint(currentVersionAsString);
+        VersionNumber versionHint = VersionNumber.parseVersionHint(versionHintAsString);
 
-        List<VersionNumber> orderedListOfVersions = existingVersions.stream()
+        Optional<VersionNumber> latestTagInCurrentReleaseTrack = existingVersions.stream()
             .map(VersionNumber::parse)
             .sorted()
-            .collect(Collectors.toList());
-
-        Optional<VersionNumber> eligibleVersion = orderedListOfVersions.stream()
-            .filter(versionHint::canBeUsedWhenDeterminingReleaseVersion)
+            .filter(versionTag ->
+                isVersionTagPartOfReleaseTrack(versionSegmentToIncrement, versionHint, versionTag))
             .reduce((first, second) -> second);
 
-        Optional<VersionNumber> lastRelease = orderedListOfVersions.stream()
-            .filter(VersionNumber::isSemanticVersion)
-            .reduce((first, second) -> second);
-
-        if (!eligibleVersion.isPresent()) {
+        // To handle first version tag in a new release track
+        if (!latestTagInCurrentReleaseTrack.isPresent()) {
             return versionHint.unlockVersion();
         }
 
-        if (useVersionHintAsIs(versionHint, eligibleVersion.get())) {
+        // To handle version bumping within the same release track
+        if (isVersionHintGreaterThanVersionTag(versionHint, latestTagInCurrentReleaseTrack.get())) {
             return versionHint.unlockVersion();
         }
 
         if (VersionSegment.MINOR.equals(versionSegmentToIncrement)) {
-            return lastRelease
-                .map(VersionNumber::incrementMinorSegment)
-                .orElse(versionHint.unlockVersion());
+            return latestTagInCurrentReleaseTrack.get().incrementMinorSegment();
+        } else {
+            return latestTagInCurrentReleaseTrack.get().incrementPatchSegment();
         }
-
-        return eligibleVersion.get().incrementPatchSegment();
     }
 
-    private static boolean useVersionHintAsIs(VersionNumber versionHint, VersionNumber eligibleVersion) {
-        if (versionHint.getVersionNumberSegments().size() != 3) {
+    private static boolean isVersionTagPartOfReleaseTrack(
+        VersionSegment versionSegment, VersionNumber versionHint, VersionNumber versionTag) {
+
+        if (!versionTag.isSemanticVersion()) {
             return false;
         }
-        VersionNumber versionHintAsSemanticVersion = VersionNumber.parse(versionHint.toString());
-        return versionHintAsSemanticVersion.compareTo(eligibleVersion) > 0;
+
+        List<String> versionTagSegments = versionTag.getVersionNumberSegments();
+        List<String> versionHintSegments = versionHint.getVersionNumberSegments();
+
+        int segmentsToCompare = VersionSegment.PATCH.equals(versionSegment) ? 2 : 1;
+        if (versionHintSegments.size() < segmentsToCompare) {
+            segmentsToCompare = versionHintSegments.size();
+        }
+
+        if (segmentsToCompare == 0) {
+            return false;
+        }
+        if (segmentsToCompare >= 1 && !versionHintSegments.get(0).equals(versionTagSegments.get(0))) {
+            return false;
+        }
+        if (segmentsToCompare >= 2 && !versionHintSegments.get(1).equals(versionTagSegments.get(1))) {
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean isVersionHintGreaterThanVersionTag(VersionNumber versionHint, VersionNumber versionTag) {
+        VersionNumber versionHintAsSemanticVersion = VersionNumber.parse(versionHint.unlockVersion().toString());
+        return versionHintAsSemanticVersion.compareTo(versionTag) > 0;
     }
 
 }

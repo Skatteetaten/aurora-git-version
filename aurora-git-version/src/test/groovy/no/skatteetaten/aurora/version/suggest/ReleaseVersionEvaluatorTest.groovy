@@ -18,13 +18,12 @@ class ReleaseVersionEvaluatorTest extends Specification {
     where:
       expectedVersionSegment | versionHint
       VersionSegment.PATCH   | "1.2.3"
-      VersionSegment.PATCH   | "1.0.0-SNAPSHOT"
-      VersionSegment.PATCH   | "1.0.1-SNAPSHOT"
+      VersionSegment.PATCH   | "1.0.0"
+      VersionSegment.PATCH   | "1.0.1"
       VersionSegment.PATCH   | "1.2"
-      VersionSegment.PATCH   | "1.0-SNAPSHOT"
-      VersionSegment.PATCH   | "1.1-SNAPSHOT"
+      VersionSegment.PATCH   | "1.0"
+      VersionSegment.PATCH   | "1.1"
       VersionSegment.MINOR   | "1"
-      VersionSegment.MINOR   | "1-SNAPSHOT"
   }
 
   @Unroll
@@ -38,17 +37,17 @@ class ReleaseVersionEvaluatorTest extends Specification {
     then:
       versionSegmentToIncrement == expectedVersionSegment
     where:
-      expectedVersionSegment | versionHint      | originatingBranchName | forcePatchIncrementFor | forceMinorIncrementFor
-      VersionSegment.PATCH   | "1-SNAPSHOT"     | "feature/some"        | ["feature"]            | []
-      VersionSegment.MINOR   | "1-SNAPSHOT"     | "feature/some"        | []                     | ["feature"]
-      VersionSegment.PATCH   | "1.0-SNAPSHOT"   | "feature/some"        | ["feature"]            | []
-      VersionSegment.MINOR   | "1.0-SNAPSHOT"   | "feature/some"        | []                     | ["feature"]
-      VersionSegment.PATCH   | "1.0.1-SNAPSHOT" | "feature/some"        | ["feature"]            | []
-      VersionSegment.MINOR   | "1.0.1-SNAPSHOT" | "feature/some"        | []                     | ["feature"]
-      VersionSegment.MINOR   | "1.0-SNAPSHOT"   | "feature/some"        | ["feature"]            | ["feature"]
-      VersionSegment.PATCH   | "1.0-SNAPSHOT"   | "bugfix/some"         | ["bugfix", "hotfix"]   | ["feature"]
-      VersionSegment.PATCH   | "1.0-SNAPSHOT"   | "bugfix/some"         | ["BUGFIX", "hotfix"]   | ["feature"]
-      VersionSegment.PATCH   | "1.0-SNAPSHOT"   | "BUGFIX/some"         | ["bugfix", "hotfix"]   | ["feature"]
+      expectedVersionSegment | versionHint | originatingBranchName | forcePatchIncrementFor | forceMinorIncrementFor
+      VersionSegment.PATCH   | "1"         | "feature/some"        | ["feature"]            | []
+      VersionSegment.MINOR   | "1"         | "feature/some"        | []                     | ["feature"]
+      VersionSegment.PATCH   | "1.0"       | "feature/some"        | ["feature"]            | []
+      VersionSegment.MINOR   | "1.0"       | "feature/some"        | []                     | ["feature"]
+      VersionSegment.PATCH   | "1.0.1"     | "feature/some"        | ["feature"]            | []
+      VersionSegment.MINOR   | "1.0.1"     | "feature/some"        | []                     | ["feature"]
+      VersionSegment.MINOR   | "1.0"       | "feature/some"        | ["feature"]            | ["feature"]
+      VersionSegment.PATCH   | "1.0"       | "bugfix/some"         | ["bugfix", "hotfix"]   | ["feature"]
+      VersionSegment.PATCH   | "1.0"       | "bugfix/some"         | ["BUGFIX", "hotfix"]   | ["feature"]
+      VersionSegment.PATCH   | "1.0"       | "BUGFIX/some"         | ["bugfix", "hotfix"]   | ["feature"]
 
   }
 

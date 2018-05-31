@@ -75,25 +75,6 @@ public final class VersionNumber implements Comparable<VersionNumber> {
         return new VersionNumber(versionNumberSegments.subList(0, newLength), isSemanticVersion);
     }
 
-    public boolean canBeUsedWhenDeterminingReleaseVersion(VersionNumber other) {
-        if (!other.isSemanticVersion || this.isSemanticVersion) {
-            return false;
-        }
-        if (other.versionNumberSegments.size() > this.versionNumberSegments.size()) {
-            other = other.shorten(versionNumberSegments.size());
-        }
-
-        List<String> thisSegs = this.versionNumberSegments;
-        List<String> otherSegs = other.versionNumberSegments;
-        if (thisSegs.size() >= 1 && !thisSegs.get(0).equals(otherSegs.get(0))) {
-            return false;
-        }
-        if (thisSegs.size() >= 2 && !thisSegs.get(1).equals(otherSegs.get(1))) {
-            return false;
-        }
-        return true;
-    }
-
     public VersionNumber unlockVersion() {
 
         List<String> segments = new ArrayList<>(versionNumberSegments);

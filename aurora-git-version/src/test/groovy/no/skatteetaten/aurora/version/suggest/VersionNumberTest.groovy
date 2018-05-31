@@ -4,12 +4,13 @@ import spock.lang.Specification
 
 class VersionNumberTest extends Specification {
 
-  def "version number with major, minor and revision versions outputs X.Y.Z"() {
+  def "version number with major, minor and patch is considered a semantic version"() {
     given:
       def version = "1.2.3"
     when:
       def versionNumber = VersionNumber.parse(version)
     then:
+      versionNumber.isSemanticVersion() == true
       versionNumber.toString() == "1.2.3"
   }
 
@@ -31,20 +32,28 @@ class VersionNumberTest extends Specification {
       versionNumber.toString() == "1234567.2345678.2322"
   }
 
-  def "Version number support Maven snapshot syntax"() {
-    given:
-      def version = "1.2-SNAPSHOT"
+  def "Various supported snapshot syntaxes"() {
     when:
-      def versionNumber = VersionNumber.parse(version)
+      def versionNumber = VersionNumber.parse(givenVersion)
+      def versionHint = VersionNumber.parseVersionHint(givenVersion)
     then:
       versionNumber.isSemanticVersion() == false
-      versionNumber.toString() == "1.2"
+      versionHint.isSemanticVersion() == false
+      versionNumber.toString() == expectedVersionString
+      versionHint.toString() == expectedVersionString
+    where:
+      givenVersion   | expectedVersionString
+      "1.2-SNAPSHOT" | "1.2"     // maven syntax
+      "1-SNAPSHOT"   | "1"       // maven syntax
+      "2.1.x"        | "2.1"
+      "2.x.x"        | "2"
   }
 
   def "Version numbers are naturally sorted by their individual segments"() {
     given:
       def unsortedVersions = [
-          VersionNumber.parse("8.2-SNAPSHOT"),
+          VersionNumber.parseVersionHint("8"),
+          VersionNumber.parseVersionHint("8.2"),
           VersionNumber.parse("8.2.8"),
           VersionNumber.parse("1.8.9"),
           VersionNumber.parse("8.2.0"),
@@ -52,32 +61,32 @@ class VersionNumberTest extends Specification {
     when:
       def sortedVersions = unsortedVersions.toSorted()
     then:
-      sortedVersions.collect { it.toString() } == ["1.8.9", "8.2.0", "8.2.8", "8.2", "10.0.1"]
+      sortedVersions.collect { it.toString() } == ["1.8.9", "8.2.0", "8.2.8", "8", "8.2", "10.0.1"]
   }
 
-  def "Snapshot versions are considered greater than equal release"() {
+  def "version hints are considered greater than equal semantic version"() {
     given:
       def baseVersion = VersionNumber.parse("3.3.0");
-      def snapshotVersion = VersionNumber.parse("3.3.0-SNAPSHOT");
+      def snapshotVersion = VersionNumber.parseVersionHint("3.3.0");
     when:
       def difference = baseVersion.compareTo(snapshotVersion);
     then:
       difference == -1
   }
 
-  def "Snapshot versions are considered greater than same version with more digits"() {
+  def "version hints are considered greater than same semantic version with more digits"() {
     given:
       def baseVersion = VersionNumber.parse("3.3.1");
-      def snapshotVersion = VersionNumber.parse("3.3-SNAPSHOT");
+      def snapshotVersion = VersionNumber.parseVersionHint("3.3");
     when:
       def difference = baseVersion.compareTo(snapshotVersion);
     then:
       difference == -1
   }
 
-  def "A shortened snapshot is still a snapshot"() {
+  def "A shortened non semantic version is still a non semantic version"() {
     given:
-      def originalVersion = VersionNumber.parse("3.3.1-SNAPSHOT");
+      def originalVersion = VersionNumber.parseVersionHint("3.3.1");
     when:
       def shortenedVerison = originalVersion.shorten(2);
     then:
@@ -85,20 +94,10 @@ class VersionNumberTest extends Specification {
       shortenedVerison.toString() == "3.3"
   }
 
-  def "A version number with the same leading version numbers can be used when determining release version"() {
-    given:
-      def releasedVersion = VersionNumber.parse("3.3.1");
-      def developmentVersion = VersionNumber.parse("3.3-SNAPSHOT");
-    when:
-      def similar = developmentVersion.canBeUsedWhenDeterminingReleaseVersion(releasedVersion);
-    then:
-      similar == true
-  }
-
   def "Shorter version numbers autopads length when adapting to longer version number"() {
     given:
       def releasedVersion = VersionNumber.parse("3.4.0");
-      def developmentVersion = VersionNumber.parse("3.4-SNAPSHOT");
+      def developmentVersion = VersionNumber.parseVersionHint("3.4");
     when:
       def adaptedVersion = releasedVersion.adaptTo(developmentVersion);
     then:
@@ -114,9 +113,9 @@ class VersionNumberTest extends Specification {
       increasedVersion.toString() == "3.2.2";
   }
 
-  def "last version number is incremented with snapshots"() {
+  def "last version number is incremented for non semantic versions"() {
     given:
-      def version = VersionNumber.parse("3.2-SNAPSHOT");
+      def version = VersionNumber.parseVersionHint("3.2");
     when:
       def increasedVersion = version.incrementPatchSegment();
     then:
@@ -124,17 +123,17 @@ class VersionNumberTest extends Specification {
       increasedVersion.isSemanticVersion() == false
   }
 
-  def "Version numbers is extended with another segment with value 0 when unlocked"() {
+  def "Version numbers are extended with segments with value 0 when unlocked"() {
     given:
-      def developmentVersion = VersionNumber.parse(version)
+      def developmentVersion = VersionNumber.parseVersionHint(givenVersion)
     when:
       def unlockedVersion = developmentVersion.unlockVersion()
     then:
       unlockedVersion.toString() == expectedVersion
     where:
-      version        | expectedVersion
-      "3.3-SNAPSHOT" | "3.3.0"
-      "3-SNAPSHOT"   | "3.0.0"
+      givenVersion | expectedVersion
+      "3.3"        | "3.3.0"
+      "3"          | "3.0.0"
   }
 
   def "Version hint is always treated as non semantic version"() {
@@ -148,9 +147,9 @@ class VersionNumberTest extends Specification {
       "1"              | "1"
       "1.1"            | "1.1"
       "1.0.1"          | "1.0.1"
-      "1-SNAPSHOT"     | "1"
-      "1.2-SNAPSHOT"   | "1.2"
-      "1.2.3-SNAPSHOT" | "1.2.3"
+      "1"              | "1"
+      "1.2"            | "1.2"
+      "1.2.3"          | "1.2.3"
   }
 
   def "example of valid semantic version numbers"() {
@@ -182,7 +181,7 @@ class VersionNumberTest extends Specification {
           "1..1.1..1",
           "123456789..123456789.123456789..123456789",
           "12.0.0.1",
-          "1.2-SNAPSHOT"
+          "1.2"
       ]
     when:
       def versionNumbers = versions.collect { VersionNumber.parse(it) }
