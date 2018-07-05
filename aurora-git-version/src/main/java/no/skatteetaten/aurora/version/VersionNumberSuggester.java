@@ -42,8 +42,13 @@ public final class VersionNumberSuggester {
             .determineVersion();
 
         if (shouldInferReleaseVersion(versionFromGit)) {
-            return getInferredVersion();
+            return getInferredVersion(Optional.empty());
         }
+
+        if (versionFromGit.isFromTag() && options.getForceSegmentIncrementForExistingTag().isPresent()) {
+            return getInferredVersion(options.getForceSegmentIncrementForExistingTag());
+        }
+
         return versionFromGit.getVersion();
     }
 
@@ -63,16 +68,17 @@ public final class VersionNumberSuggester {
         return options.getBranchesToInferReleaseVersionsFor().contains(currentBranch);
     }
 
-    private String getInferredVersion() {
+    private String getInferredVersion(Optional<VersionSegment> forceUpdateForVersionSegment) {
         List<String> existingVersions = repository.getAllVersionsFromTags(options.getVersionPrefix());
         Optional<RevCommit> commitLogEntry = repository.getLogEntryForCurrentHead();
         Optional<String> originatingBranchName = GitLogParser.findOriginatingBranchName(commitLogEntry);
 
-        VersionSegment versionSegmentToIncrement = ReleaseVersionEvaluator.findVersionSegmentToIncrement(
-            options.getVersionHint(),
-            originatingBranchName,
-            options.getForcePatchIncrementForBranchPrefixes(),
-            options.getForceMinorIncrementForBranchPrefixes());
+        VersionSegment versionSegmentToIncrement = forceUpdateForVersionSegment.orElseGet(() ->
+            ReleaseVersionEvaluator.findVersionSegmentToIncrement(
+                options.getVersionHint(),
+                originatingBranchName,
+                options.getForcePatchIncrementForBranchPrefixes(),
+                options.getForceMinorIncrementForBranchPrefixes()));
 
         VersionNumber inferredVersion = ReleaseVersionIncrementer.suggestNextReleaseVersion(
             versionSegmentToIncrement,
@@ -88,7 +94,8 @@ public final class VersionNumberSuggester {
         o.setFallbackToBranchNameEnv(options.isFallbackToBranchNameEnv());
         o.setVersionPrefix(options.getVersionPrefix());
         o.setBranchesToUseTagsAsVersionsFor(options.getBranchesToUseTagsAsVersionsFor());
-        o.setTryDeterminingCurrentVersionFromTagName(options.isTryDeterminingCurrentVersionFromTagName());
+        o.setTryDeterminingCurrentVersionFromTagName(options.isTryDeterminingCurrentVersionFromTagName()
+            || options.getForceSegmentIncrementForExistingTag().isPresent());
         return o;
     }
 
