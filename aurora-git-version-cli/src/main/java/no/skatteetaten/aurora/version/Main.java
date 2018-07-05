@@ -106,7 +106,7 @@ public final class Main {
             .desc("Overrides the default behaviour of using the version number found in existing tag. Normally used "
                 + "to allow re-build in CI/CD pipelines with automatic version increment. Only usable together with "
                 + "--suggest-releases. List of supported arguments:"
-                + "\n 'default' or no argument : increment using default strategy (as if there where no tag)"
+                + "\n 'default' or no argument : increment using default strategy (as if there were no tag)"
                 + "\n 'patch'                  : force increment of patch segment"
                 + "\n 'minor'                  : force increment of minor segment"
                 )
