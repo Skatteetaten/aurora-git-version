@@ -4,6 +4,9 @@ import static java.util.Collections.emptyList;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+
+import no.skatteetaten.aurora.version.suggest.VersionSegment;
 
 /**
  * SuggesterOptions for the <code>{@link VersionNumberSuggester#suggestVersion}</code> method.
@@ -73,6 +76,16 @@ public class SuggesterOptions {
      * List of branch prefixes which shall force increment of PATCH segment in version number
      */
     private List<String> forcePatchIncrementForBranchPrefixes = Collections.emptyList();
+
+    /**
+     * By default, if HEAD of current branch has a tag, that tag vil be used as the suggested version.
+     * This option will turn of that feature and force an increment of given version segment when a tag is found.
+     *
+     * Normally used to allow re-build in CI/CD pipelines with automatic version increment.
+     *
+     * Note: Value of `tryDeterminingCurrentVersionFromTagName` is ignored when this option is set to a branch prefix.
+     */
+    private Optional<VersionSegment> forceSegmentIncrementForExistingTag = Optional.empty();
 
     public List<String> getBranchesToInferReleaseVersionsFor() {
         return branchesToInferReleaseVersionsFor;
@@ -153,4 +166,13 @@ public class SuggesterOptions {
     public void setForcePatchIncrementForBranchPrefixes(List<String> forcePatchIncrementForBranchPrefixes) {
         this.forcePatchIncrementForBranchPrefixes = forcePatchIncrementForBranchPrefixes;
     }
+
+    public Optional<VersionSegment> getForceSegmentIncrementForExistingTag() {
+        return forceSegmentIncrementForExistingTag;
+    }
+
+    public void setForceSegmentIncrementForExistingTag(Optional<VersionSegment> forceSegmentIncrementForExistingTag) {
+        this.forceSegmentIncrementForExistingTag = forceSegmentIncrementForExistingTag;
+    }
+
 }
