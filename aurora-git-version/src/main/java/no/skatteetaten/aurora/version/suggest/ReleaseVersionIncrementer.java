@@ -1,6 +1,7 @@
 package no.skatteetaten.aurora.version.suggest;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public final class ReleaseVersionIncrementer {
@@ -22,10 +23,11 @@ public final class ReleaseVersionIncrementer {
         VersionNumber versionHint = VersionNumber.parseVersionHint(versionHintAsString);
 
         Optional<VersionNumber> latestTagInCurrentReleaseTrack = existingVersions.stream()
-            .map(VersionNumber::parse)
+            .map(ReleaseVersionIncrementer::getVersionNumberOrNull)
+            .filter(Objects::nonNull)
             .sorted()
-            .filter(versionTag ->
-                isVersionTagPartOfReleaseTrack(versionSegmentToIncrement, versionHint, versionTag))
+            .filter(
+                versionNumber -> isVersionTagPartOfReleaseTrack(versionSegmentToIncrement, versionHint, versionNumber))
             .reduce((first, second) -> second);
 
         // To handle first version tag in a new release track
@@ -42,6 +44,14 @@ public final class ReleaseVersionIncrementer {
             return latestTagInCurrentReleaseTrack.get().incrementMinorSegment();
         } else {
             return latestTagInCurrentReleaseTrack.get().incrementPatchSegment();
+        }
+    }
+
+    private static VersionNumber getVersionNumberOrNull(String versionString) {
+        try {
+            return VersionNumber.parse(versionString);
+        } catch (Exception e) {
+            return null;
         }
     }
 
