@@ -92,7 +92,7 @@ class ReleaseVersionIncrementerTest extends Specification {
 
   def "shall ignore non semantic version tags when determining which version number to suggest"() {
     given:
-      def existingVersions = ["1.1", "1.0.0", "1.1.0.202", "1.1.0.ad4ea2f35", "1.1.0-SNAPSHOT"]
+      def existingVersions = ["1.1", "1.0.0", "1.1.0.202", "1.1.0.ad4ea2f35", "1.1.0-SNAPSHOT", "vfeature-SPAP-218-1-DEV"]
       def versionHint = "1"
 
     when:
