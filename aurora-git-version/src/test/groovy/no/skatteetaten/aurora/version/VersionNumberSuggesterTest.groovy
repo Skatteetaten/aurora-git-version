@@ -12,7 +12,7 @@ class VersionNumberSuggesterTest extends Specification {
     given: "Configuration indicating v2.0.0 as next version, but respecting existing tag"
       def opt = new SuggesterOptions()
       opt.gitRepoPath = repoOnTag
-      opt.branchesToInferReleaseVersionsFor = ["master"]
+      opt.branchesToInferReleaseVersionsFor=["master"]
       opt.versionHint = "2"
 
     when: "suggesting next version"
@@ -26,7 +26,7 @@ class VersionNumberSuggesterTest extends Specification {
     given: "Configuration indicating v2.0.0 as next version"
       def opt = new SuggesterOptions()
       opt.gitRepoPath = repoOnTag
-      opt.branchesToInferReleaseVersionsFor = ["master"]
+      opt.branchesToInferReleaseVersionsFor=["master"]
       opt.versionHint = "2"
       opt.tryDeterminingCurrentVersionFromTagName = false
 
@@ -41,7 +41,7 @@ class VersionNumberSuggesterTest extends Specification {
     given: "Configuration indicating v1.0.1 as next version"
       def opt = new SuggesterOptions()
       opt.gitRepoPath = repoOnTag
-      opt.branchesToInferReleaseVersionsFor = ["master"]
+      opt.branchesToInferReleaseVersionsFor=["master"]
       opt.versionHint = "1.0"
       opt.tryDeterminingCurrentVersionFromTagName = false
 
@@ -56,7 +56,7 @@ class VersionNumberSuggesterTest extends Specification {
     given: "Configuration indicating v1.0.1 as next version"
       def opt = new SuggesterOptions()
       opt.gitRepoPath = repoOnTag
-      opt.branchesToInferReleaseVersionsFor = ["master"]
+      opt.branchesToInferReleaseVersionsFor=["master"]
       opt.versionHint = "1.0"
       opt.tryDeterminingCurrentVersionFromTagName = false
       opt.forceSegmentIncrementForExistingTag = Optional.of(VersionSegment.MINOR)
@@ -72,7 +72,7 @@ class VersionNumberSuggesterTest extends Specification {
     given: "Configuration indicating v1.1.0 as next version"
       def opt = new SuggesterOptions()
       opt.gitRepoPath = repoOnTag
-      opt.branchesToInferReleaseVersionsFor = ["master"]
+      opt.branchesToInferReleaseVersionsFor=["master"]
       opt.versionHint = "1"
       opt.tryDeterminingCurrentVersionFromTagName = false
       opt.forceSegmentIncrementForExistingTag = Optional.of(VersionSegment.PATCH)
