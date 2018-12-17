@@ -36,17 +36,6 @@ public final class VersionNumberSuggester {
         this.options = options;
     }
 
-    private static GitVersion.Options createGitVersionOptions(SuggesterOptions options) {
-        GitVersion.Options o = new GitVersion.Options();
-        o.setFallbackBranchNameEnvName(options.getFallbackBranchNameEnvName());
-        o.setFallbackToBranchNameEnv(options.isFallbackToBranchNameEnv());
-        o.setVersionPrefix(options.getVersionPrefix());
-        o.setBranchesToUseTagsAsVersionsFor(options.getBranchesToUseTagsAsVersionsFor());
-        o.setTryDeterminingCurrentVersionFromTagName(options.isTryDeterminingCurrentVersionFromTagName()
-            || options.getForceSegmentIncrementForExistingTag().isPresent());
-        return o;
-    }
-
     private String suggestVersionHelper() {
 
         GitVersion.Version versionFromGit = new GitVersion(repository, createGitVersionOptions(options))
@@ -95,6 +84,17 @@ public final class VersionNumberSuggester {
             existingVersions);
 
         return inferredVersion.toString();
+    }
+
+    private static GitVersion.Options createGitVersionOptions(SuggesterOptions options) {
+        GitVersion.Options o = new GitVersion.Options();
+        o.setFallbackBranchNameEnvName(options.getFallbackBranchNameEnvName());
+        o.setFallbackToBranchNameEnv(options.isFallbackToBranchNameEnv());
+        o.setVersionPrefix(options.getVersionPrefix());
+        o.setBranchesToUseTagsAsVersionsFor(options.getBranchesToUseTagsAsVersionsFor());
+        o.setTryDeterminingCurrentVersionFromTagName(options.isTryDeterminingCurrentVersionFromTagName()
+            || options.getForceSegmentIncrementForExistingTag().isPresent());
+        return o;
     }
 
 }
