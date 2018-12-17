@@ -23,11 +23,6 @@ public final class VersionNumberSuggester {
 
     private final SuggesterOptions options;
 
-    private VersionNumberSuggester(GitRepo repository, SuggesterOptions options) {
-        this.repository = repository;
-        this.options = options;
-    }
-
     public static String suggestVersion() {
         return suggestVersion(new SuggesterOptions());
     }
@@ -36,11 +31,19 @@ public final class VersionNumberSuggester {
         return new VersionNumberSuggester(GitRepo.fromDir(options.getGitRepoPath()), options).suggestVersionHelper();
     }
 
+    private VersionNumberSuggester(GitRepo repository, SuggesterOptions options) {
+        this.repository = repository;
+        this.options = options;
+    }
+
     private static GitVersion.Options createGitVersionOptions(SuggesterOptions options) {
         GitVersion.Options o = new GitVersion.Options();
         o.setFallbackBranchNameEnvName(options.getFallbackBranchNameEnvName());
         o.setFallbackToBranchNameEnv(options.isFallbackToBranchNameEnv());
         o.setVersionPrefix(options.getVersionPrefix());
+        o.setBranchesToUseTagsAsVersionsFor(options.getBranchesToUseTagsAsVersionsFor());
+        o.setTryDeterminingCurrentVersionFromTagName(options.isTryDeterminingCurrentVersionFromTagName()
+            || options.getForceSegmentIncrementForExistingTag().isPresent());
         return o;
     }
 
@@ -49,16 +52,31 @@ public final class VersionNumberSuggester {
         GitVersion.Version versionFromGit = new GitVersion(repository, createGitVersionOptions(options))
             .determineVersion();
 
-        String inferedVersion= getInferredVersion(Optional.empty());
-
-        if (versionFromGit.isFromTag()) {
-            if (options.getForceSegmentIncrementForExistingTag().isPresent()) {
-                return getInferredVersion(options.getForceSegmentIncrementForExistingTag());
-            }
-            return versionFromGit.getVersion();
+        if (shouldInferReleaseVersion(versionFromGit)) {
+            return getInferredVersion(Optional.empty());
         }
 
-        return getInferredVersion(Optional.empty());
+        if (versionFromGit.isFromTag() && options.getForceSegmentIncrementForExistingTag().isPresent()) {
+            return getInferredVersion(options.getForceSegmentIncrementForExistingTag());
+        }
+
+        return versionFromGit.getVersion();
+    }
+
+    private boolean shouldInferReleaseVersion(GitVersion.Version versionFromGit) {
+
+        if (versionFromGit.isFromTag()) {
+            return false;
+        }
+
+        Optional<String> currentBranchOption = repository.getBranchName(
+            options.isFallbackToBranchNameEnv(),
+            options.getFallbackBranchNameEnvName());
+
+        String currentBranch = currentBranchOption
+            .orElseThrow(() -> new IllegalStateException("Unable to determine name of current branch"));
+
+        return options.getBranchesToInferReleaseVersionsFor().contains(currentBranch);
     }
 
     private String getInferredVersion(Optional<VersionSegment> forceUpdateForVersionSegment) {
@@ -67,7 +85,8 @@ public final class VersionNumberSuggester {
         Optional<String> originatingBranchName = GitLogParser.findOriginatingBranchName(commitLogEntry);
 
         VersionSegment versionSegmentToIncrement = forceUpdateForVersionSegment.orElseGet(() ->
-            ReleaseVersionEvaluator.findVersionSegmentToIncrement(originatingBranchName,
+            ReleaseVersionEvaluator.findVersionSegmentToIncrement(
+                originatingBranchName,
                 options.getForceMinorIncrementForBranchPrefixes()));
 
         VersionNumber inferredVersion = ReleaseVersionIncrementer.suggestNextReleaseVersion(

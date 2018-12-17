@@ -48,16 +48,25 @@ public final class Main {
 
         String path = cmd.getOptionValue("p", "./");
         String versionHint = cmd.getOptionValue("version-hint", "");
+        List<String> branchesToStipulateReleaseVersionsFor = getCommaSeparatedOptionValue(cmd, "suggest-releases");
         List<String> forceMinorPrefixes = getCommaSeparatedOptionValue(cmd, "force-minor-prefixes");
         Optional<VersionSegment> incrementForExistingTag = Optional.empty();
         if (cmd.hasOption("increment-for-existing-tag")) {
             incrementForExistingTag = Optional.of(VersionSegment.PATCH);
         }
 
+        if (!branchesToStipulateReleaseVersionsFor.isEmpty()) {
+            if (versionHint.isEmpty()) {
+                throw new IllegalArgumentException("version-hint is required when using suggest-releases");
+            }
+        }
+
         SuggesterOptions suggesterOptions = new SuggesterOptions();
         suggesterOptions.setGitRepoPath(path);
+        suggesterOptions.setBranchesToInferReleaseVersionsFor(branchesToStipulateReleaseVersionsFor);
         suggesterOptions.setVersionHint(versionHint);
         suggesterOptions.setForceMinorIncrementForBranchPrefixes(forceMinorPrefixes);
+        suggesterOptions.setTryDeterminingCurrentVersionFromTagName(!incrementForExistingTag.isPresent());
         suggesterOptions.setForceSegmentIncrementForExistingTag(incrementForExistingTag);
 
         return suggesterOptions;
@@ -68,6 +77,12 @@ public final class Main {
         Options options = new Options();
         options.addOption("p", "path", true, "The path to the git repository");
         options.addOption("h", "help", false, "Display help");
+
+        options.addOption(Option.builder().longOpt("suggest-releases")
+            .desc("Comma separated list of branches for which to suggest release versions")
+            .hasArg()
+            .argName("BRANCH-CSV")
+            .build());
 
         options.addOption(Option.builder().longOpt("version-hint")
             .desc("The version hint to use when suggesting the next release version. ")

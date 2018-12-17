@@ -34,6 +34,25 @@ public class SuggesterOptions {
     private String fallbackBranchNameEnvName = "BRANCH_NAME";
 
     /**
+     * A list of branch names that should have versions inferred based on earlier versions and the
+     * <code>versionHint</code> when the version cannot be determined from an existing tag.
+     */
+    private List<String> branchesToInferReleaseVersionsFor = emptyList();
+
+    /**
+     * Whether or not we should use try to use existing tags on the current commit for determining the current version.
+     * Setting this to <code>false</code> will always yield a snapshot version.
+     */
+    private boolean tryDeterminingCurrentVersionFromTagName = true;
+
+    /**
+     * A list of branch names that should use the tags of the current commit to determine version. Branches not in this
+     * list will always yield snapshot versions. An empty list will use all branches. Use
+     * <code>tryDeterminingCurrentVersionFromTagName</code> to disable this feature.
+     */
+    private List<String> branchesToUseTagsAsVersionsFor = emptyList();
+
+    /**
      * Version hint indicating current release track.
      * Can contain non numeric information, as in 1.0-SNAPSHOT normally used by Maven.
      * <p>
@@ -62,6 +81,13 @@ public class SuggesterOptions {
      */
     private Optional<VersionSegment> forceSegmentIncrementForExistingTag = Optional.empty();
 
+    public List<String> getBranchesToInferReleaseVersionsFor() {
+        return branchesToInferReleaseVersionsFor;
+    }
+
+    public void setBranchesToInferReleaseVersionsFor(List<String> branchesToInferReleaseVersionsFor) {
+        this.branchesToInferReleaseVersionsFor = branchesToInferReleaseVersionsFor;
+    }
 
     public String getVersionPrefix() {
         return versionPrefix;
@@ -101,6 +127,22 @@ public class SuggesterOptions {
 
     public void setGitRepoPath(String gitRepoPath) {
         this.gitRepoPath = gitRepoPath;
+    }
+
+    public boolean isTryDeterminingCurrentVersionFromTagName() {
+        return tryDeterminingCurrentVersionFromTagName;
+    }
+
+    public void setTryDeterminingCurrentVersionFromTagName(boolean tryDeterminingCurrentVersionFromTagName) {
+        this.tryDeterminingCurrentVersionFromTagName = tryDeterminingCurrentVersionFromTagName;
+    }
+
+    public List<String> getBranchesToUseTagsAsVersionsFor() {
+        return branchesToUseTagsAsVersionsFor;
+    }
+
+    public void setBranchesToUseTagsAsVersionsFor(List<String> branchesToUseTagsAsVersionsFor) {
+        this.branchesToUseTagsAsVersionsFor = branchesToUseTagsAsVersionsFor;
     }
 
     public List<String> getForceMinorIncrementForBranchPrefixes() {
