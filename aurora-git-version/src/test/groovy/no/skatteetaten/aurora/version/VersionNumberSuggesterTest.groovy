@@ -16,7 +16,7 @@ class VersionNumberSuggesterTest extends Specification {
       opt.versionHint = "2"
 
     when: "suggesting next version"
-      def versionNumber = VersionNumberSuggester.suggestVersion(opt)
+      def versionNumber = VersionNumberSuggester.suggestVersion(opt);
 
     then: "expect version number from tag used"
       versionNumber == "1.0.0"
@@ -31,7 +31,7 @@ class VersionNumberSuggesterTest extends Specification {
       opt.tryDeterminingCurrentVersionFromTagName = false
 
     when: "suggesting next version"
-      def versionNumber = VersionNumberSuggester.suggestVersion(opt)
+      def versionNumber = VersionNumberSuggester.suggestVersion(opt);
 
     then: "expect inferred version to be used"
       versionNumber == "2.0.0"
@@ -46,7 +46,7 @@ class VersionNumberSuggesterTest extends Specification {
       opt.tryDeterminingCurrentVersionFromTagName = false
 
     when: "suggesting next version"
-      def versionNumber = VersionNumberSuggester.suggestVersion(opt)
+      def versionNumber = VersionNumberSuggester.suggestVersion(opt);
 
     then: "expect inferred version to be used, as if there where not tag"
       versionNumber == "1.0.1"
@@ -78,7 +78,7 @@ class VersionNumberSuggesterTest extends Specification {
       opt.forceSegmentIncrementForExistingTag = Optional.of(VersionSegment.PATCH)
 
     when: "suggesting next version"
-      def versionNumber = VersionNumberSuggester.suggestVersion(opt)
+      def versionNumber = VersionNumberSuggester.suggestVersion(opt);
 
     then: "expect inferred version with forced increment of patch segment"
       versionNumber == "1.0.1"
