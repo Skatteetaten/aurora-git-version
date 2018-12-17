@@ -21,25 +21,14 @@ public final class ReleaseVersionEvaluator {
      *     1   - Increment MINOR to next minor version<br>
      */
     public static VersionSegment findVersionSegmentToIncrement(
-        String versionHintAsString,
         Optional<String> originatingBranchName,
-        List<String> forcePatchIncrementForBranchPrefixes,
         List<String> forceMinorIncrementForBranchPrefixes) {
-
-        VersionNumber versionHint = VersionNumber.parseVersionHint(versionHintAsString);
 
         if (prefixListContainsBranchNameCaseInsensitive(originatingBranchName, forceMinorIncrementForBranchPrefixes)) {
             return VersionSegment.MINOR;
         }
-        if (prefixListContainsBranchNameCaseInsensitive(originatingBranchName, forcePatchIncrementForBranchPrefixes)) {
-            return VersionSegment.PATCH;
-        }
 
-        if (versionHint.getVersionNumberSegments().size() == 1) {
-            return VersionSegment.MINOR;
-        } else {
-            return VersionSegment.PATCH;
-        }
+        return VersionSegment.PATCH;
     }
 
     private static boolean prefixListContainsBranchNameCaseInsensitive(

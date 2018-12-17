@@ -15,11 +15,7 @@ class ReleaseVersionTest extends Specification {
       def existingVersions = ["2.2.2", "3.0.0", "1.1.0", "1.1.1", "1.2.2", "1.2.1", "1.2.0", "1.3.0"]
 
     when:
-      def versionSegmentToIncrement = ReleaseVersionEvaluator.findVersionSegmentToIncrement(
-          versionHint,
-          Optional.empty(),
-          [],
-          [])
+      def versionSegmentToIncrement = ReleaseVersionEvaluator.findVersionSegmentToIncrement(Optional.empty(), [])
 
       def inferredVersion = ReleaseVersionIncrementer.suggestNextReleaseVersion(
           versionSegmentToIncrement,
@@ -37,9 +33,9 @@ class ReleaseVersionTest extends Specification {
       "1.0.0"         | "1.0"
       "1.1.2"         | "1.1"
       "1.4.0"         | "1.4"
-      "1.4.0"         | "1"
-      "2.3.0"         | "2"
-      "3.1.0"         | "3"
+      "1.3.1"         | "1"
+      "2.2.3"         | "2"
+      "3.0.1"         | "3"
       "4.0.0"         | "4"
   }
 
@@ -50,10 +46,7 @@ class ReleaseVersionTest extends Specification {
 
     when:
       def versionSegmentToIncrement = ReleaseVersionEvaluator.findVersionSegmentToIncrement(
-          versionHint,
-          Optional.of(originatingBranchName),
-          forcePatchIncrementFor,
-          forceMinorIncrementFor)
+          Optional.of(originatingBranchName), forceMinorIncrementFor)
 
       def inferredVersion = ReleaseVersionIncrementer.suggestNextReleaseVersion(
           versionSegmentToIncrement,
@@ -64,19 +57,19 @@ class ReleaseVersionTest extends Specification {
       inferredVersion.toString() == expectedVersion
 
     where:
-      expectedVersion | versionHint | originatingBranchName | forcePatchIncrementFor | forceMinorIncrementFor
-      "1.1.2"         | "1.1"       | "branch/some"         | ["branch"]             | []
-      "1.4.0"         | "1.1"       | "branch/some"         | []                     | ["branch"]
-      "1.5.0"         | "1.5"       | "branch/some"         | ["branch"]             | []
-      "1.5.0"         | "1.5"       | "branch/some"         | []                     | ["branch"]
-      "1.3.1"         | "1"         | "branch/some"         | ["branch"]             | []
-      "1.4.0"         | "1"         | "branch/some"         | []                     | ["branch"]
-      "2.2.3"         | "2"         | "branch/some"         | ["branch"]             | []
-      "2.3.0"         | "2"         | "branch/some"         | []                     | ["branch"]
-      "3.0.1"         | "3"         | "branch/some"         | ["branch"]             | []
-      "3.1.0"         | "3"         | "branch/some"         | []                     | ["branch"]
-      "4.0.0"         | "4"         | "branch/some"         | ["branch"]             | []
-      "4.0.0"         | "4"         | "branch/some"         | []                     | ["branch"]
+      expectedVersion | versionHint | originatingBranchName | forceMinorIncrementFor
+      "1.1.2"         | "1.1"       | "branch/some"         | []
+      "1.4.0"         | "1.1"       | "branch/some"         | ["branch"]
+      "1.5.0"         | "1.5"       | "branch/some"         | []
+      "1.5.0"         | "1.5"       | "branch/some"         | ["branch"]
+      "1.3.1"         | "1"         | "branch/some"         | []
+      "1.4.0"         | "1"         | "branch/some"         | ["branch"]
+      "2.2.3"         | "2"         | "branch/some"         | []
+      "2.3.0"         | "2"         | "branch/some"         | ["branch"]
+      "3.0.1"         | "3"         | "branch/some"         | []
+      "3.1.0"         | "3"         | "branch/some"         | ["branch"]
+      "4.0.0"         | "4"         | "branch/some"         | []
+      "4.0.0"         | "4"         | "branch/some"         | ["branch"]
 
   }
 
