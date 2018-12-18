@@ -15,7 +15,7 @@ class ReleaseVersionTest extends Specification {
       def existingVersions = ["2.2.2", "3.0.0", "1.1.0", "1.1.1", "1.2.2", "1.2.1", "1.2.0", "1.3.0"]
 
     when:
-      def versionSegmentToIncrement = ReleaseVersionEvaluator.findVersionSegmentToIncrement(Optional.empty(), [])
+      def versionSegmentToIncrement = ReleaseVersionEvaluator.findVersionSegmentToIncrement(versionHint, Optional.empty(), [])
 
       def inferredVersion = ReleaseVersionIncrementer.suggestNextReleaseVersion(
           versionSegmentToIncrement,
@@ -40,12 +40,12 @@ class ReleaseVersionTest extends Specification {
   }
 
   @Unroll
-  def "shall suggest version #expectedVersion for version #versionHint for #originatingBranchName, #forcePatchIncrementFor and #forceMinorIncrementFor"() {
+  def "shall suggest version #expectedVersion for version #versionHint for #originatingBranchName  and #forceMinorIncrementFor"() {
     given:
       def existingVersions = ["2.2.2", "3.0.0", "1.1.0", "1.1.1", "1.2.2", "1.2.1", "1.2.0", "1.3.0"]
 
     when:
-      def versionSegmentToIncrement = ReleaseVersionEvaluator.findVersionSegmentToIncrement(
+      def versionSegmentToIncrement = ReleaseVersionEvaluator.findVersionSegmentToIncrement(versionHint,
           Optional.of(originatingBranchName), forceMinorIncrementFor)
 
       def inferredVersion = ReleaseVersionIncrementer.suggestNextReleaseVersion(
@@ -59,7 +59,7 @@ class ReleaseVersionTest extends Specification {
     where:
       expectedVersion | versionHint | originatingBranchName | forceMinorIncrementFor
       "1.1.2"         | "1.1"       | "branch/some"         | []
-      "1.4.0"         | "1.1"       | "branch/some"         | ["branch"]
+      "1.1.2"         | "1.1"       | "branch/some"         | ["branch"]
       "1.5.0"         | "1.5"       | "branch/some"         | []
       "1.5.0"         | "1.5"       | "branch/some"         | ["branch"]
       "1.3.1"         | "1"         | "branch/some"         | []

@@ -16,15 +16,20 @@ public final class ReleaseVersionEvaluator {
      * If none of the forced update conditions apply, the number of version segments in the current
      * version hint will dictate which segment to increment. <br>
      * <p>
-     *   Examples:<br>
-     *     1.0 - Increment PATCH to next patch version<br>
-     *     1   - Increment MINOR to next minor version<br>
+     * Examples:<br>
+     * 1.0 - Will never increment Minor even if commit start matches prefix
+     * 1   - Increment PATCH to next minor version<br>
      */
     public static VersionSegment findVersionSegmentToIncrement(
+        String versionHintAsString,
         Optional<String> originatingBranchName,
         List<String> forceMinorIncrementForBranchPrefixes) {
 
-        if (prefixListContainsBranchNameCaseInsensitive(originatingBranchName, forceMinorIncrementForBranchPrefixes)) {
+        VersionNumber versionHint = VersionNumber.parseVersionHint(versionHintAsString);
+
+        if (versionHint.getVersionNumberSegments().size() == 1
+            && prefixListContainsBranchNameCaseInsensitive(originatingBranchName,
+            forceMinorIncrementForBranchPrefixes)) {
             return VersionSegment.MINOR;
         }
 

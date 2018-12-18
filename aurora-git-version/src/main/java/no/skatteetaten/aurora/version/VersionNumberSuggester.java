@@ -75,6 +75,7 @@ public final class VersionNumberSuggester {
 
         VersionSegment versionSegmentToIncrement = forceUpdateForVersionSegment.orElseGet(() ->
             ReleaseVersionEvaluator.findVersionSegmentToIncrement(
+                options.getVersionHint(),
                 originatingBranchName,
                 options.getForceMinorIncrementForBranchPrefixes()));
 
