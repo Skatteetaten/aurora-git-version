@@ -23,11 +23,15 @@ public final class GitLogParser {
     static final Pattern GIT_MERGE = buildMultilinePattern(
         "Merge branch '(?<branch>\\S+)'");
 
+    static final Pattern SQUASH_MERGE = buildMultilinePattern(
+        "^(?<branch>\\S+)");
+
     // The order in this list is highly significant !
     static final List<Pattern> PATTERNS = Arrays.asList(
         BITBUCKET_MERGE_FROM_PULL_REQUEST,
         BITBUCKET_MERGE_NODE,
-        GIT_MERGE);
+        GIT_MERGE,
+        SQUASH_MERGE);
 
     /**
      * Tries to find the name of the originating branch for a merge, by applying a set of
