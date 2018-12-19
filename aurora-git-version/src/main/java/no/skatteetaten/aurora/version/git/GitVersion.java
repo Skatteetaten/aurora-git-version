@@ -2,12 +2,15 @@ package no.skatteetaten.aurora.version.git;
 
 import static java.util.Collections.emptyList;
 
+import static no.skatteetaten.aurora.version.git.GitVersion.VersionSource.TAG;
+
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jgit.lib.ObjectId;
 
+import no.skatteetaten.aurora.version.suggest.VersionNumber;
 import no.skatteetaten.aurora.version.utils.Assert;
 
 public class GitVersion {
@@ -15,6 +18,13 @@ public class GitVersion {
     private final Options options;
 
     private final GitRepo repository;
+
+    public GitVersion(GitRepo gitRepo, Options options) {
+        Assert.notNull(gitRepo, "Repository cannot be null");
+        Assert.notNull(options, "SuggesterOptions cannot be null");
+        this.repository = gitRepo;
+        this.options = options;
+    }
 
     public static Version determineVersion(File gitDir) {
         return determineVersion(gitDir, new Options());
@@ -43,11 +53,21 @@ public class GitVersion {
         return new GitVersion(GitRepo.fromDir(gitDir), options).determineVersion();
     }
 
-    public GitVersion(GitRepo gitRepo, Options options) {
-        Assert.notNull(gitRepo, "Repository cannot be null");
-        Assert.notNull(options, "SuggesterOptions cannot be null");
-        this.repository = gitRepo;
-        this.options = options;
+    public static Optional<String> getMostRecentTag(List<String> tags) {
+
+        tags.sort((s1, s2) -> {
+            int lengthComp = Integer.compare(s1.length(), s2.length());
+            if (lengthComp != 0) {
+                // If the tag names are not the same length, the shortest ones should come first
+                return lengthComp;
+            }
+            // If the tag names are the same length, order them by their natural order
+            return s1.compareTo(s2);
+        });
+        // Now, the tags list will be either empty or ordered by their natural order with the shortest names first.
+        // We can now get the last tag, assuming this is the most recent tag. For instance, in a list of tags like
+        // the following; dev-1, dev-10, dev-11, dev-2, dev-3..., we will get dev-11 as the most recent tag.
+        return tags.isEmpty() ? Optional.empty() : Optional.of(tags.get(tags.size() - 1));
     }
 
     public Version determineVersion() {
@@ -64,19 +84,35 @@ public class GitVersion {
             : Optional.empty();
 
         return versionTagOnHead
-            .map(this::getVersionFromVersionTag)
+            .map(v -> versionFromTagOrBranchIfNotReleaseBranch(v, currentBranchName))
             .orElseGet(() -> currentBranchName
                 .map(this::getVersionFromBranchName)
                 .orElse(new Version(options.fallbackVersion, VersionSource.FALLBACK)));
     }
 
+    private Version versionFromTagOrBranchIfNotReleaseBranch(String v, Optional<String> currentBranchName) {
+        Version version = getVersionFromVersionTag(v);
+        if (version.source == TAG && VersionNumber.parse(version.getVersion()).isSemanticVersion()) {
+            return currentBranchName
+                .filter(this::isNotReleaseBranch)
+                .map(this::getVersionFromBranchName)
+                .orElse(version);
+
+        }
+        return version;
+    }
+
     protected Version getVersionFromVersionTag(String versionTag) {
+        VersionSource source = TAG;
+        if (!versionTag.startsWith(options.versionPrefix)) {
+            source = VersionSource.MANUAL_TAG;
+        }
         String version = versionTag.replaceFirst(options.versionPrefix, "");
-        return createVersion(VersionSource.TAG, version, "");
+        return createVersion(source, version, "");
     }
 
     protected Optional<String> getVersionTagOnCommit(ObjectId head) {
-        return getMostRecentTag(repository.getVersionTagsFromCommit(head, options.versionPrefix));
+        return getMostRecentTag(repository.getVersionTagsFromCommit(head, ""));
     }
 
     private Optional<String> getCurrentBranchName() {
@@ -106,24 +142,12 @@ public class GitVersion {
         return new Version(version, versionSource);
     }
 
-    public static Optional<String> getMostRecentTag(List<String> tags) {
-
-        tags.sort((s1, s2) -> {
-            int lengthComp = Integer.compare(s1.length(), s2.length());
-            if (lengthComp != 0) {
-                // If the tag names are not the same length, the shortest ones should come first
-                return lengthComp;
-            }
-            // If the tag names are the same length, order them by their natural order
-            return s1.compareTo(s2);
-        });
-        // Now, the tags list will be either empty or ordered by their natural order with the shortest names first.
-        // We can now get the last tag, assuming this is the most recent tag. For instance, in a list of tags like
-        // the following; dev-1, dev-10, dev-11, dev-2, dev-3..., we will get dev-11 as the most recent tag.
-        return tags.isEmpty() ? Optional.empty() : Optional.of(tags.get(tags.size() - 1));
+    private boolean isNotReleaseBranch(String b) {
+        return !this.options.branchesToUseTagsAsVersionsFor.contains(b);
     }
 
     public enum VersionSource {
+        MANUAL_TAG,
         TAG,
         BRANCH,
         FALLBACK
@@ -149,10 +173,9 @@ public class GitVersion {
         }
 
         public boolean isFromTag() {
-            return getSource() == VersionSource.TAG;
+            return getSource() == TAG;
         }
     }
-
 
     public static class Options {
         /**
@@ -169,7 +192,6 @@ public class GitVersion {
         private String versionFromBranchNamePostfix = "-SNAPSHOT";
         private int versionMaxLength = DEFAULT_VERSION_MAX_LENGTH;
 
-
         /**
          * Whether or not we should use try to use existing tags on the current commit for determining the current
          * version. Setting this to <code>false</code> will always yield a snapshot version.
@@ -182,7 +204,6 @@ public class GitVersion {
          * <code>tryDeterminingCurrentVersionFromTagName</code> to disable this feature.
          */
         private List<String> branchesToUseTagsAsVersionsFor = emptyList();
-
 
         public String getVersionPrefix() {
             return versionPrefix;
@@ -259,6 +280,7 @@ public class GitVersion {
         /**
          * Note that overriding the default value for versionMaxLength may render the generated version string an
          * illegal dns label.
+         *
          * @param versionMaxLength
          */
         public void setVersionMaxLength(int versionMaxLength) {

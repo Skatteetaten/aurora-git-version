@@ -1,6 +1,7 @@
 package no.skatteetaten.aurora.version.git
 
 import static no.skatteetaten.aurora.version.git.GitVersion.VersionSource.BRANCH
+import static no.skatteetaten.aurora.version.git.GitVersion.VersionSource.MANUAL_TAG
 import static no.skatteetaten.aurora.version.git.GitVersion.VersionSource.TAG
 
 import org.eclipse.jgit.lib.Repository
@@ -33,8 +34,9 @@ class GitVersionTest extends Specification {
 
     where:
       repo               | expectedVersion    | versionSource | useTags | tagBranches
+      "on_manual_tag"    | "manual"           | MANUAL_TAG    | true    | []
       "on_branch"        | "develop-SNAPSHOT" | BRANCH        | true    | []
-      "on_tag"           | "1.0.0"            | TAG           | true    | []
+      "on_tag"           | "master-SNAPSHOT"  | BRANCH        | true    | []
       "on_detached_head" | "develop-SNAPSHOT" | BRANCH        | true    | []
       "on_tag"           | "master-SNAPSHOT"  | BRANCH        | false   | []
       "on_tag"           | "master-SNAPSHOT"  | BRANCH        | true    | ['develop']

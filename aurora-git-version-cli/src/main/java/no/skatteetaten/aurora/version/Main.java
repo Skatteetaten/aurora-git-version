@@ -64,6 +64,7 @@ public final class Main {
         SuggesterOptions suggesterOptions = new SuggesterOptions();
         suggesterOptions.setGitRepoPath(path);
         suggesterOptions.setBranchesToInferReleaseVersionsFor(branchesToStipulateReleaseVersionsFor);
+        suggesterOptions.setBranchesToUseTagsAsVersionsFor(branchesToStipulateReleaseVersionsFor);
         suggesterOptions.setVersionHint(versionHint);
         suggesterOptions.setForceMinorIncrementForBranchPrefixes(forceMinorPrefixes);
         suggesterOptions.setTryDeterminingCurrentVersionFromTagName(!incrementForExistingTag.isPresent());
