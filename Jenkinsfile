@@ -11,7 +11,7 @@ def overrides = [
     credentialsId: "github",
     deployTo: 'maven-central',
     suggestVersionAndTagReleases: [
-        [branch: 'master', versionHint: '3.0']
+        [branch: 'master', versionHint: '3']
     ]
 ]
 
