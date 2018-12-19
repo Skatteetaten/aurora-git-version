@@ -56,7 +56,7 @@ public final class VersionNumber implements Comparable<VersionNumber> {
         return new VersionNumber(segments, isSemanticVersion);
     }
 
-    private static boolean isValidSemanticVersion(String versionString) {
+    public static boolean isValidSemanticVersion(String versionString) {
         Pattern pattern = Pattern.compile("^\\d+\\.\\d+\\.\\d+$");
         Matcher matcher = pattern.matcher(versionString);
         return matcher.matches();

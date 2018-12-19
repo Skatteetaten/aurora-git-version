@@ -8,7 +8,7 @@ class VersionNumberSuggesterTest extends Specification {
   static String repoFolder = GitRepoHelper.repoFolder
   static String repoOnTag = "$repoFolder/on_tag" // repo on branch master, already tagged as v1.0.0 
 
-  def "Foog"() {
+  def "Should allow manual tag on non release branch"() {
     given: "Configuration indicating v2.0.0 as next version, but respecting existing tag"
       def opt = new SuggesterOptions()
       opt.gitRepoPath = "$repoFolder/on_manual_tag"
@@ -17,7 +17,7 @@ class VersionNumberSuggesterTest extends Specification {
       def versionNumber = VersionNumberSuggester.suggestVersion(opt)
 
     then: "expect snapshot since semantic release and we are not on release branch"
-      versionNumber == "manual"
+      versionNumber == "Manual"
   }
 
   def "If not on release branch do not honor semantic tags"() {

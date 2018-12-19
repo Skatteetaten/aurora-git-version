@@ -92,7 +92,7 @@ public class GitVersion {
 
     private Version versionFromTagOrBranchIfNotReleaseBranch(String v, Optional<String> currentBranchName) {
         Version version = getVersionFromVersionTag(v);
-        if (version.source == TAG && VersionNumber.parse(version.getVersion()).isSemanticVersion()) {
+        if (version.source == TAG && VersionNumber.isValidSemanticVersion(version.getVersion())) {
             return currentBranchName
                 .filter(this::isNotReleaseBranch)
                 .map(this::getVersionFromBranchName)
@@ -103,16 +103,12 @@ public class GitVersion {
     }
 
     protected Version getVersionFromVersionTag(String versionTag) {
-        VersionSource source = TAG;
-        if (!versionTag.startsWith(options.versionPrefix)) {
-            source = VersionSource.MANUAL_TAG;
-        }
         String version = versionTag.replaceFirst(options.versionPrefix, "");
-        return createVersion(source, version, "");
+        return createVersion(TAG, version, "");
     }
 
     protected Optional<String> getVersionTagOnCommit(ObjectId head) {
-        return getMostRecentTag(repository.getVersionTagsFromCommit(head, ""));
+        return getMostRecentTag(repository.getVersionTagsFromCommit(head, options.versionPrefix));
     }
 
     private Optional<String> getCurrentBranchName() {
@@ -147,7 +143,6 @@ public class GitVersion {
     }
 
     public enum VersionSource {
-        MANUAL_TAG,
         TAG,
         BRANCH,
         FALLBACK

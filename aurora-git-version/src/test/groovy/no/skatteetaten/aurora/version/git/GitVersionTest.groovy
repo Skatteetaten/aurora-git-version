@@ -34,7 +34,7 @@ class GitVersionTest extends Specification {
 
     where:
       repo               | expectedVersion    | versionSource | useTags | tagBranches
-      "on_manual_tag"    | "manual"           | MANUAL_TAG    | true    | []
+      "on_manual_tag"    | "Manual"           | TAG           | true    | []
       "on_branch"        | "develop-SNAPSHOT" | BRANCH        | true    | []
       "on_tag"           | "master-SNAPSHOT"  | BRANCH        | true    | []
       "on_detached_head" | "develop-SNAPSHOT" | BRANCH        | true    | []
