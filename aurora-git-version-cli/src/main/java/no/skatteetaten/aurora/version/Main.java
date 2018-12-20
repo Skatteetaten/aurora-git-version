@@ -49,9 +49,11 @@ public final class Main {
         String path = cmd.getOptionValue("p", "./");
         String versionHint = cmd.getOptionValue("version-hint", "");
         List<String> branchesToStipulateReleaseVersionsFor = getCommaSeparatedOptionValue(cmd, "suggest-releases");
-        List<String> forcePatchPrefixes = getCommaSeparatedOptionValue(cmd, "force-patch-prefixes");
         List<String> forceMinorPrefixes = getCommaSeparatedOptionValue(cmd, "force-minor-prefixes");
-        Optional<String> incrementForExistingTag = getOptionalOptionValue(cmd, "increment-for-existing-tag", "default");
+        Optional<VersionSegment> incrementForExistingTag = Optional.empty();
+        if (cmd.hasOption("increment-for-existing-tag")) {
+            incrementForExistingTag = Optional.of(VersionSegment.PATCH);
+        }
 
         if (!branchesToStipulateReleaseVersionsFor.isEmpty()) {
             if (versionHint.isEmpty()) {
@@ -62,12 +64,11 @@ public final class Main {
         SuggesterOptions suggesterOptions = new SuggesterOptions();
         suggesterOptions.setGitRepoPath(path);
         suggesterOptions.setBranchesToInferReleaseVersionsFor(branchesToStipulateReleaseVersionsFor);
+        suggesterOptions.setBranchesToUseTagsAsVersionsFor(branchesToStipulateReleaseVersionsFor);
         suggesterOptions.setVersionHint(versionHint);
-        suggesterOptions.setForcePatchIncrementForBranchPrefixes(forcePatchPrefixes);
         suggesterOptions.setForceMinorIncrementForBranchPrefixes(forceMinorPrefixes);
         suggesterOptions.setTryDeterminingCurrentVersionFromTagName(!incrementForExistingTag.isPresent());
-        suggesterOptions.setForceSegmentIncrementForExistingTag(
-            incrementForExistingTag.flatMap(value -> readEnumStringIgnoringCase(value, VersionSegment.class)));
+        suggesterOptions.setForceSegmentIncrementForExistingTag(incrementForExistingTag);
 
         return suggesterOptions;
     }
@@ -85,14 +86,7 @@ public final class Main {
             .build());
 
         options.addOption(Option.builder().longOpt("version-hint")
-            .desc("The version hint to use when suggesting the next release version. "
-                + "Required when using --suggest-releases")
-            .hasArg()
-            .build());
-
-        options.addOption(Option.builder().longOpt("force-patch-prefixes")
-            .desc("Comma separated list for branch prefixes which will force increase of the versions patch segment. "
-                + "Leave empty or unused to disable. Only usable together with --suggest-releases")
+            .desc("The version hint to use when suggesting the next release version. ")
             .hasArg()
             .build());
 
@@ -103,15 +97,7 @@ public final class Main {
             .build());
 
         options.addOption(Option.builder().longOpt("increment-for-existing-tag")
-            .desc("Overrides the default behaviour of using the version number found in existing tag. Normally used "
-                + "to allow re-build in CI/CD pipelines with automatic version increment. Only usable together with "
-                + "--suggest-releases. List of supported arguments:"
-                + "\n 'default' or no argument : increment using default strategy (as if there were no tag)"
-                + "\n 'patch'                  : force increment of patch segment"
-                + "\n 'minor'                  : force increment of minor segment"
-                )
-            .hasArg()
-            .optionalArg(true)
+            .desc("If current commit has version bump patch instead of using the version from the tag")
             .build());
 
         return options;
@@ -149,6 +135,5 @@ public final class Main {
             .map(item -> Enum.valueOf(enumType, item))
             .findAny();
     }
-
 
 }

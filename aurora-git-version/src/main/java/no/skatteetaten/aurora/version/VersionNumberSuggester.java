@@ -77,7 +77,6 @@ public final class VersionNumberSuggester {
             ReleaseVersionEvaluator.findVersionSegmentToIncrement(
                 options.getVersionHint(),
                 originatingBranchName,
-                options.getForcePatchIncrementForBranchPrefixes(),
                 options.getForceMinorIncrementForBranchPrefixes()));
 
         VersionNumber inferredVersion = ReleaseVersionIncrementer.suggestNextReleaseVersion(

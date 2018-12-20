@@ -8,15 +8,42 @@ class VersionNumberSuggesterTest extends Specification {
   static String repoFolder = GitRepoHelper.repoFolder
   static String repoOnTag = "$repoFolder/on_tag" // repo on branch master, already tagged as v1.0.0 
 
+  def "Should allow manual tag on non release branch"() {
+    given: "Configuration indicating v2.0.0 as next version, but respecting existing tag"
+      def opt = new SuggesterOptions()
+      opt.gitRepoPath = "$repoFolder/on_manual_tag"
+
+    when: "suggesting next version"
+      def versionNumber = VersionNumberSuggester.suggestVersion(opt)
+
+    then: "expect snapshot since semantic release and we are not on release branch"
+      versionNumber == "Manual"
+  }
+
+  def "If not on release branch do not honor semantic tags"() {
+    given: "Configuration indicating v2.0.0 as next version, but respecting existing tag"
+      def opt = new SuggesterOptions()
+      opt.gitRepoPath = repoOnTag
+      opt.branchesToInferReleaseVersionsFor = ["develop"]
+      opt.branchesToUseTagsAsVersionsFor = ["develop"]
+
+    when: "suggesting next version"
+      def versionNumber = VersionNumberSuggester.suggestVersion(opt)
+
+    then: "expect snapshot since semantic release and we are not on release branch"
+      versionNumber == "master-SNAPSHOT"
+  }
+
   def "Use version number from tag"() {
     given: "Configuration indicating v2.0.0 as next version, but respecting existing tag"
       def opt = new SuggesterOptions()
       opt.gitRepoPath = repoOnTag
-      opt.branchesToInferReleaseVersionsFor=["master"]
+      opt.branchesToInferReleaseVersionsFor = ["master"]
+      opt.branchesToUseTagsAsVersionsFor = ["master"]
       opt.versionHint = "2"
 
     when: "suggesting next version"
-      def versionNumber = VersionNumberSuggester.suggestVersion(opt);
+      def versionNumber = VersionNumberSuggester.suggestVersion(opt)
 
     then: "expect version number from tag used"
       versionNumber == "1.0.0"
@@ -26,12 +53,13 @@ class VersionNumberSuggesterTest extends Specification {
     given: "Configuration indicating v2.0.0 as next version"
       def opt = new SuggesterOptions()
       opt.gitRepoPath = repoOnTag
-      opt.branchesToInferReleaseVersionsFor=["master"]
+      opt.branchesToInferReleaseVersionsFor = ["master"]
+      opt.branchesToUseTagsAsVersionsFor = ["master"]
       opt.versionHint = "2"
       opt.tryDeterminingCurrentVersionFromTagName = false
 
     when: "suggesting next version"
-      def versionNumber = VersionNumberSuggester.suggestVersion(opt);
+      def versionNumber = VersionNumberSuggester.suggestVersion(opt)
 
     then: "expect inferred version to be used"
       versionNumber == "2.0.0"
@@ -41,12 +69,13 @@ class VersionNumberSuggesterTest extends Specification {
     given: "Configuration indicating v1.0.1 as next version"
       def opt = new SuggesterOptions()
       opt.gitRepoPath = repoOnTag
-      opt.branchesToInferReleaseVersionsFor=["master"]
+      opt.branchesToInferReleaseVersionsFor = ["master"]
+      opt.branchesToUseTagsAsVersionsFor = ["master"]
       opt.versionHint = "1.0"
       opt.tryDeterminingCurrentVersionFromTagName = false
 
     when: "suggesting next version"
-      def versionNumber = VersionNumberSuggester.suggestVersion(opt);
+      def versionNumber = VersionNumberSuggester.suggestVersion(opt)
 
     then: "expect inferred version to be used, as if there where not tag"
       versionNumber == "1.0.1"
@@ -56,13 +85,14 @@ class VersionNumberSuggesterTest extends Specification {
     given: "Configuration indicating v1.0.1 as next version"
       def opt = new SuggesterOptions()
       opt.gitRepoPath = repoOnTag
-      opt.branchesToInferReleaseVersionsFor=["master"]
+      opt.branchesToInferReleaseVersionsFor = ["master"]
+      opt.branchesToUseTagsAsVersionsFor = ["master"]
       opt.versionHint = "1.0"
       opt.tryDeterminingCurrentVersionFromTagName = false
       opt.forceSegmentIncrementForExistingTag = Optional.of(VersionSegment.MINOR)
 
     when: "suggesting next version"
-      def versionNumber = VersionNumberSuggester.suggestVersion(opt);
+      def versionNumber = VersionNumberSuggester.suggestVersion(opt)
 
     then: "expect inferred version with forced increment of minor segment"
       versionNumber == "1.1.0"
@@ -72,13 +102,13 @@ class VersionNumberSuggesterTest extends Specification {
     given: "Configuration indicating v1.1.0 as next version"
       def opt = new SuggesterOptions()
       opt.gitRepoPath = repoOnTag
-      opt.branchesToInferReleaseVersionsFor=["master"]
+      opt.branchesToInferReleaseVersionsFor = ["master"]
       opt.versionHint = "1"
       opt.tryDeterminingCurrentVersionFromTagName = false
       opt.forceSegmentIncrementForExistingTag = Optional.of(VersionSegment.PATCH)
 
     when: "suggesting next version"
-      def versionNumber = VersionNumberSuggester.suggestVersion(opt);
+      def versionNumber = VersionNumberSuggester.suggestVersion(opt)
 
     then: "expect inferred version with forced increment of patch segment"
       versionNumber == "1.0.1"

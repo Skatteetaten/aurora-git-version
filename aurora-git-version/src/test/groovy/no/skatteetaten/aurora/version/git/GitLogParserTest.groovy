@@ -13,7 +13,9 @@ class GitLogParserTest extends Specification {
       "BitBucket merge from fork":
           "Merge pull request #3 in PROJ/repo from user/repo:bugfix/my-local-branch to master",
       "Standard Git merge message":
-          "Merge branch 'feature/PROJ-123-feature'"
+          "Merge branch 'feature/PROJ-123-feature'",
+      "Squash merge message":
+          "feature/PROJ-124 Foobar"
   ]
 
   @Unroll
@@ -32,6 +34,7 @@ class GitLogParserTest extends Specification {
       "BitBucket merge commit"     | "feature/PROJ_192-branch-name"
       "BitBucket merge from fork"  | "bugfix/my-local-branch"
       "Standard Git merge message" | "feature/PROJ-123-feature"
+      "Squash merge message"       | "feature/PROJ-124"
 
   }
 
@@ -42,7 +45,7 @@ class GitLogParserTest extends Specification {
       |author FirstName LastName <FirstName.LastName@email.com> 1524144672 +0200
       |committer FirstName LastName <FirstName.LastName@email.com> 1524144672 +0200
       |
-      | ${message}
+      |${message}
       |    
       | Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis non odio mauris. 
       | Nunc vel vestibulum lectus. Donec pharetra interdum nunc et viverra. Fusce ac mattis.

@@ -71,12 +71,6 @@ public class SuggesterOptions {
      * List of branch prefixes which shall force increment of MINOR segment in version number
      */
     private List<String> forceMinorIncrementForBranchPrefixes = Collections.emptyList();
-
-    /**
-     * List of branch prefixes which shall force increment of PATCH segment in version number
-     */
-    private List<String> forcePatchIncrementForBranchPrefixes = Collections.emptyList();
-
     /**
      * By default, if HEAD of current branch has a tag, that tag vil be used as the suggested version.
      * This option will turn of that feature and force an increment of given version segment when a tag is found.
@@ -159,13 +153,6 @@ public class SuggesterOptions {
         this.forceMinorIncrementForBranchPrefixes = forceMinorIncrementForBranchPrefixes;
     }
 
-    public List<String> getForcePatchIncrementForBranchPrefixes() {
-        return forcePatchIncrementForBranchPrefixes;
-    }
-
-    public void setForcePatchIncrementForBranchPrefixes(List<String> forcePatchIncrementForBranchPrefixes) {
-        this.forcePatchIncrementForBranchPrefixes = forcePatchIncrementForBranchPrefixes;
-    }
 
     public Optional<VersionSegment> getForceSegmentIncrementForExistingTag() {
         return forceSegmentIncrementForExistingTag;
