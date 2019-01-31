@@ -57,8 +57,8 @@ public class SuggesterOptions {
      * Can contain non numeric information, as in 1.0-SNAPSHOT normally used by Maven.
      * <p>
      * Examples: <br>
-     * 1   - increment MINOR to next minor version for given major track 1.x
-     * 1.2 - increment PATCH to next patch version for given minor track 1.2.x
+     *  1   - increment MINOR to next minor version for given major track 1.x
+     *  1.2 - increment PATCH to next patch version for given minor track 1.2.x
      */
     private String versionHint = null;
 
@@ -74,9 +74,7 @@ public class SuggesterOptions {
     /**
      * By default, if HEAD of current branch has a tag, that tag vil be used as the suggested version.
      * This option will turn of that feature and force an increment of given version segment when a tag is found.
-     * <p>
      * Normally used to allow re-build in CI/CD pipelines with automatic version increment.
-     * <p>
      * Note: Value of `tryDeterminingCurrentVersionFromTagName` is ignored when this option is set to a branch prefix.
      */
     private Optional<VersionSegment> forceSegmentIncrementForExistingTag = Optional.empty();
