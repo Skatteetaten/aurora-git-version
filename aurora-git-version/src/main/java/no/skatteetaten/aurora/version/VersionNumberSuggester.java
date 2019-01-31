@@ -23,17 +23,29 @@ public final class VersionNumberSuggester {
 
     private final SuggesterOptions options;
 
+    private VersionNumberSuggester(GitRepo repository, SuggesterOptions options) {
+        this.repository = repository;
+        this.options = options;
+    }
+
     public static String suggestVersion() {
         return suggestVersion(new SuggesterOptions());
     }
 
     public static String suggestVersion(SuggesterOptions options) {
         return new VersionNumberSuggester(GitRepo.fromDir(options.getGitRepoPath()), options).suggestVersionHelper();
+
     }
 
-    private VersionNumberSuggester(GitRepo repository, SuggesterOptions options) {
-        this.repository = repository;
-        this.options = options;
+    private static GitVersion.Options createGitVersionOptions(SuggesterOptions options) {
+        GitVersion.Options o = new GitVersion.Options();
+        o.setFallbackBranchNameEnvName(options.getFallbackBranchNameEnvName());
+        o.setFallbackToBranchNameEnv(options.isFallbackToBranchNameEnv());
+        o.setVersionPrefix(options.getVersionPrefix());
+        o.setBranchesToUseTagsAsVersionsFor(options.getBranchesToUseTagsAsVersionsFor());
+        o.setTryDeterminingCurrentVersionFromTagName(options.isTryDeterminingCurrentVersionFromTagName()
+            || options.getForceSegmentIncrementForExistingTag().isPresent());
+        return o;
     }
 
     private String suggestVersionHelper() {
@@ -50,6 +62,7 @@ public final class VersionNumberSuggester {
         }
 
         return versionFromGit.getVersion();
+
     }
 
     private boolean shouldInferReleaseVersion(GitVersion.Version versionFromGit) {
@@ -84,18 +97,11 @@ public final class VersionNumberSuggester {
             options.getVersionHint(),
             existingVersions);
 
-        return inferredVersion.toString();
-    }
-
-    private static GitVersion.Options createGitVersionOptions(SuggesterOptions options) {
-        GitVersion.Options o = new GitVersion.Options();
-        o.setFallbackBranchNameEnvName(options.getFallbackBranchNameEnvName());
-        o.setFallbackToBranchNameEnv(options.isFallbackToBranchNameEnv());
-        o.setVersionPrefix(options.getVersionPrefix());
-        o.setBranchesToUseTagsAsVersionsFor(options.getBranchesToUseTagsAsVersionsFor());
-        o.setTryDeterminingCurrentVersionFromTagName(options.isTryDeterminingCurrentVersionFromTagName()
-            || options.getForceSegmentIncrementForExistingTag().isPresent());
-        return o;
+        String version = inferredVersion.toString();
+        if (options.getMetadata() != null) {
+            version += "+" + options.getMetadata();
+        }
+        return version;
     }
 
 }

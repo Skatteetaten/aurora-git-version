@@ -42,7 +42,9 @@ public final class VersionNumber implements Comparable<VersionNumber> {
         return parseVersionStringHelper(versionString, forceNonSemanticVersion);
     }
 
+    //Why do this and not just add groups to the original regex?
     private static VersionNumber parseVersionStringHelper(String versionString, boolean forceNonSemanticVersion) {
+
         if (versionString == null) {
             throw new IllegalArgumentException("version string cannot be null");
         }
@@ -57,7 +59,10 @@ public final class VersionNumber implements Comparable<VersionNumber> {
     }
 
     public static boolean isValidSemanticVersion(String versionString) {
-        Pattern pattern = Pattern.compile("^\\d+\\.\\d+\\.\\d+$");
+        // This code is very incomplete regarding semantic versioning, but for our needs it will do i guess
+        // see https://github.com/semver/semver/issues/232
+
+        Pattern pattern = Pattern.compile("^\\d+\\.\\d+\\.\\d+?(\\+[0-9a-zA-Z-]+(\\.[0-9a-zA-Z-]+)*)?$");
         Matcher matcher = pattern.matcher(versionString);
         return matcher.matches();
     }
