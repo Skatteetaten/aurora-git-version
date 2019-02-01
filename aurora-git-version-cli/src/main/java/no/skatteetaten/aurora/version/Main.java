@@ -48,6 +48,8 @@ public final class Main {
 
         String path = cmd.getOptionValue("p", "./");
         String versionHint = cmd.getOptionValue("version-hint", "");
+        String metadata = cmd.getOptionValue("metadata");
+
         List<String> branchesToStipulateReleaseVersionsFor = getCommaSeparatedOptionValue(cmd, "suggest-releases");
         List<String> forceMinorPrefixes = getCommaSeparatedOptionValue(cmd, "force-minor-prefixes");
         Optional<VersionSegment> incrementForExistingTag = Optional.empty();
@@ -66,6 +68,7 @@ public final class Main {
         suggesterOptions.setBranchesToInferReleaseVersionsFor(branchesToStipulateReleaseVersionsFor);
         suggesterOptions.setBranchesToUseTagsAsVersionsFor(branchesToStipulateReleaseVersionsFor);
         suggesterOptions.setVersionHint(versionHint);
+        suggesterOptions.setMetadata(metadata);
         suggesterOptions.setForceMinorIncrementForBranchPrefixes(forceMinorPrefixes);
         suggesterOptions.setTryDeterminingCurrentVersionFromTagName(!incrementForExistingTag.isPresent());
         suggesterOptions.setForceSegmentIncrementForExistingTag(incrementForExistingTag);
@@ -100,6 +103,10 @@ public final class Main {
             .desc("If current commit has version bump patch instead of using the version from the tag")
             .build());
 
+        options.addOption(Option.builder().longOpt("metadata")
+            .desc("metadata to add to the generated version")
+            .hasArg()
+            .build());
         return options;
     }
 

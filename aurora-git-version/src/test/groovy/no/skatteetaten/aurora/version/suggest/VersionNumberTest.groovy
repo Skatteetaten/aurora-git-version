@@ -4,6 +4,16 @@ import spock.lang.Specification
 
 class VersionNumberTest extends Specification {
 
+  def "version with metadata is semantic strings metadata"() {
+    given:
+      def version = "1.2.3+foobar"
+    when:
+      def versionNumber = VersionNumber.parse(version)
+    then:
+      versionNumber.isSemanticVersion() == true
+      versionNumber.toString() == "1.2.3"
+  }
+
   def "version number with major, minor and patch is considered a semantic version"() {
     given:
       def version = "1.2.3"

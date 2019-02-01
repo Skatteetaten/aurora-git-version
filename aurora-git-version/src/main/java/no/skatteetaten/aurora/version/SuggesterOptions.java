@@ -74,12 +74,15 @@ public class SuggesterOptions {
     /**
      * By default, if HEAD of current branch has a tag, that tag vil be used as the suggested version.
      * This option will turn of that feature and force an increment of given version segment when a tag is found.
-     *
      * Normally used to allow re-build in CI/CD pipelines with automatic version increment.
-     *
      * Note: Value of `tryDeterminingCurrentVersionFromTagName` is ignored when this option is set to a branch prefix.
      */
     private Optional<VersionSegment> forceSegmentIncrementForExistingTag = Optional.empty();
+
+    /**
+     * If non-null specify metadata to add ad the end of the suggested version
+     */
+    private String metadata;
 
     public List<String> getBranchesToInferReleaseVersionsFor() {
         return branchesToInferReleaseVersionsFor;
@@ -153,7 +156,6 @@ public class SuggesterOptions {
         this.forceMinorIncrementForBranchPrefixes = forceMinorIncrementForBranchPrefixes;
     }
 
-
     public Optional<VersionSegment> getForceSegmentIncrementForExistingTag() {
         return forceSegmentIncrementForExistingTag;
     }
@@ -162,4 +164,11 @@ public class SuggesterOptions {
         this.forceSegmentIncrementForExistingTag = forceSegmentIncrementForExistingTag;
     }
 
+    public String getMetadata() {
+        return this.metadata;
+    }
+
+    public void setMetadata(String metadata) {
+        this.metadata = metadata;
+    }
 }
