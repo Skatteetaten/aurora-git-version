@@ -1,18 +1,20 @@
-#!/usr/bin/env groovy
-
 def jenkinsfile
-def version='v5'
-fileLoader.withGit('https://git.aurora.skead.no/scm/ao/aurora-pipeline-scripts.git', version) {
-   jenkinsfile = fileLoader.load('templates/leveransepakke')
-}
 
 def overrides = [
-    piTests: false,
+    scriptVersion  : 'v6',
+    pipelineScript: 'https://git.aurora.skead.no/scm/ao/aurora-pipeline-scripts.git',
     credentialsId: "github",
+    checkstyle : false,
+    sonarQube: false,
     deployTo: 'maven-central',
-    suggestVersionAndTagReleases: [
-        [branch: 'master', versionHint: '3']
+    jiraFiksetIKomponentversjon: true,
+    versionStrategy: [
+      [ branch: 'master', versionHint: '3' ]
     ]
 ]
 
-jenkinsfile.run(version, overrides)
+fileLoader.withGit(overrides.pipelineScript,, overrides.scriptVersion) {
+   jenkinsfile = fileLoader.load('templates/leveransepakke')
+}
+
+jenkinsfile.gradle(overrides.scriptVersion, overrides
