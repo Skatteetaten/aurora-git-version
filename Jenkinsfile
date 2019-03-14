@@ -10,6 +10,7 @@ def overrides = [
     artifactId: "aurora-git-version-parent",
     deployTo: 'maven-central',
     jiraFiksetIKomponentversjon: true,
+    chatRoom: "#aos-notifications",
     versionStrategy: [
       [ branch: 'master', versionHint: '3' ]
     ]
