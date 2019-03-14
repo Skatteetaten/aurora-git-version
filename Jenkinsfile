@@ -6,6 +6,8 @@ def overrides = [
     credentialsId: "github",
     checkstyle : false,
     sonarQube: false,
+    groupId: "no.skatteetaten.aurora",
+    artifactId: "aurora-git-version-parent",
     deployTo: 'maven-central',
     jiraFiksetIKomponentversjon: true,
     versionStrategy: [
