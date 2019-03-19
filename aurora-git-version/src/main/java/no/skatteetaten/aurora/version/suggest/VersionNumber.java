@@ -62,7 +62,7 @@ public final class VersionNumber implements Comparable<VersionNumber> {
         // This code is very incomplete regarding semantic versioning, but for our needs it will do i guess
         // see https://github.com/semver/semver/issues/232
 
-        Pattern pattern = Pattern.compile("^\\d+\\.\\d+\\.\\d+?(\\+[0-9a-zA-Z-]+(\\.[0-9a-zA-Z-]+)*)?$");
+        Pattern pattern = Pattern.compile("^\\d+\\.\\d+\\.\\d+?(\\+[0-9a-zA-Z]+)?$");
         Matcher matcher = pattern.matcher(versionString);
         return matcher.matches();
     }
