@@ -1,7 +1,6 @@
 package no.skatteetaten.aurora.version.git;
 
 import static java.util.Collections.emptyList;
-
 import static no.skatteetaten.aurora.version.git.GitVersion.VersionSource.TAG;
 
 import java.io.File;
