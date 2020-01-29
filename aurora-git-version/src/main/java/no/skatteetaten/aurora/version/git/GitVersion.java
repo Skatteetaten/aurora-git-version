@@ -126,6 +126,16 @@ public class GitVersion {
         Assert.notNull(versionSource, "VersionSource cannot be null");
         Assert.notNull(versionName, "VersionName cannot be null");
 
+        if (options.useNormalizationForNorwegianLetters()) {
+            versionName = versionName
+                .replaceAll("æ", "ae")
+                .replaceAll("Æ", "AE")
+                .replaceAll("ø", "oe")
+                .replaceAll("Ø", "OE")
+                .replaceAll("å", "aa")
+                .replaceAll("Å", "AA");
+        }
+
         int versionNameMaxLength = options.getVersionMaxLength() - (postfix == null ? 0 : postfix.length());
         int startIndex = Math.min(versionName.length(), versionNameMaxLength);
 
@@ -185,6 +195,7 @@ public class GitVersion {
         private String fallbackBranchNameEnvName = "BRANCH_NAME";
         private String versionFromBranchNamePostfix = "-SNAPSHOT";
         private int versionMaxLength = DEFAULT_VERSION_MAX_LENGTH;
+        private boolean useNormalizationForNorwegianLetters = true;
 
         /**
          * Whether or not we should use try to use existing tags on the current commit for determining the current
@@ -279,6 +290,14 @@ public class GitVersion {
          */
         public void setVersionMaxLength(int versionMaxLength) {
             this.versionMaxLength = versionMaxLength;
+        }
+
+        public boolean useNormalizationForNorwegianLetters() {
+            return useNormalizationForNorwegianLetters;
+        }
+
+        public void setUseNormalizationForNorwegianLetters(boolean useNormalizationForNorwegianLetters) {
+            this.useNormalizationForNorwegianLetters = useNormalizationForNorwegianLetters;
         }
     }
 }

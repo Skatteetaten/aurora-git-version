@@ -1,7 +1,6 @@
 package no.skatteetaten.aurora.version.git
 
 import static no.skatteetaten.aurora.version.git.GitVersion.VersionSource.BRANCH
-import static no.skatteetaten.aurora.version.git.GitVersion.VersionSource.MANUAL_TAG
 import static no.skatteetaten.aurora.version.git.GitVersion.VersionSource.TAG
 
 import org.eclipse.jgit.lib.Repository
@@ -63,6 +62,45 @@ class GitVersionTest extends Specification {
       "develop"                                                                                                               | "develop-SNAPSHOT"
       "bugfix/AOC-8-dialog-for-a-bekrefte-endring-tagversjon"                                                                 | "bugfix_AOC_8_dialog_for_a_bekrefte_endring_tagversjon-SNAPSHOT"
       "bugfix/AOC-8-dialog-for-a-bekrefte-endring-av-tagversjon-som-er-for-langt-branchnavn-til-at-det-gir-fornuftig-version" | "bugfix_AOC_8_dialog_for_a_bekrefte_endring_av_tagversj-SNAPSHOT"
+      "feature/AOS-4044_søknader_med_feil_inntektsår"                                                                         | "feature_AOS_4044_soeknader_med_feil_inntektsaar-SNAPSHOT"
+  }
+
+  def "Version from branches with norwegian letters"() {
+
+    given:
+      def options = new GitVersion.Options()
+      options.versionPrefix = '-SNAPSHOT'
+
+    def version = new GitVersion(new GitRepo(null), options)
+
+    expect:
+      version.getVersionFromBranchName(branchName).version == expectedVersion
+
+    where:
+      branchName                                                                                                    | expectedVersion
+      "develop"                                                                                                     | "develop-SNAPSHOT"
+      "bugfix/ABC-1337-this-is-my-life"                                                                             | "bugfix_ABC_1337_this_is_my_life-SNAPSHOT"
+      "fature/DEF-1337-SØKNADER-årets-ærfugeljakt"                                                                  | "fature_DEF_1337_SOEKNADER_aarets_aerfugeljakt-SNAPSHOT"
+      "feature/GHI-7331-mår-måker-og-andre-dyr-man-ikke-ønsker-å-ha-i-norsk-natur-pga-lang-navn-på-bancher"         | "feature_GHI_7331_maar_maaker_og_andre_dyr_man_ikke_oen-SNAPSHOT"
+  }
+
+  def "Version from branches with norwegian letters without normalization"() {
+
+    given:
+      def options = new GitVersion.Options()
+      options.versionPrefix = '-SNAPSHOT'
+      options.setUseNormalizationForNorwegianLetters(false)
+
+      def version = new GitVersion(new GitRepo(null), options)
+
+    expect:
+      version.getVersionFromBranchName(branchName).version == expectedVersion
+
+    where:
+      branchName                                                                            | expectedVersion
+      "master"                                                                              | "master-SNAPSHOT"
+      "fature/DEF-1337-øre-nese-hals"                                                       | "fature_DEF_1337_øre_nese_hals-SNAPSHOT"
+      "feature/AAA-1337-Årsaker_til-at-ørnen-kan-fly-og-andre-rase-fakta-fra-ørkenen"       | "feature_AAA_1337_Årsaker_til_at_ørnen_kan_fly_og_andre-SNAPSHOT"
   }
 
   def "Get most recent tag with no tags"() {
