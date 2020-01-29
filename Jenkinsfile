@@ -9,8 +9,7 @@ def overrides = [
     iqOrganizationName: "Team AOS",
     groupId: "no.skatteetaten.aurora",
     artifactId: "aurora-git-version-parent",
-    deployTo: 'aurora-nexus',
-    openShiftBuild: false,
+    deployTo: 'maven-central',
     jiraFiksetIKomponentversjon: true,
     chatRoom: "#aos-notifications",
     versionStrategy: [
