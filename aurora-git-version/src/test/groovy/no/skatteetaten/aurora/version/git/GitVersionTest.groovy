@@ -99,8 +99,26 @@ class GitVersionTest extends Specification {
     where:
       branchName                                                                            | expectedVersion
       "master"                                                                              | "master-SNAPSHOT"
-      "fature/DEF-1337-øre-nese-hals"                                                       | "fature_DEF_1337_øre_nese_hals-SNAPSHOT"
+      "feature/DEF-1337-øre-nese-hals"                                                      | "feature_DEF_1337_øre_nese_hals-SNAPSHOT"
       "feature/AAA-1337-Årsaker_til-at-ørnen-kan-fly-og-andre-rase-fakta-fra-ørkenen"       | "feature_AAA_1337_Årsaker_til_at_ørnen_kan_fly_og_andre-SNAPSHOT"
+  }
+
+  def "Version from branches with comma"() {
+
+    given:
+      def options = new GitVersion.Options()
+      options.versionPrefix = '-SNAPSHOT'
+      options.setUseNormalizationForNorwegianLetters(false)
+
+      def version = new GitVersion(new GitRepo(null), options)
+
+    expect:
+      version.getVersionFromBranchName(branchName).version == expectedVersion
+
+    where:
+      branchName                                                                                    | expectedVersion
+      "feature/ABC-Navigating-through-snow,-sleet,-wind,-and-darkness-is-a-miserable-way-to-travel" | "feature_ABC_Navigating_through_snow__sleet__wind__and_-SNAPSHOT"
+      "feature/,DEF-Snow,-sleet,,,"                                                                 | "feature__DEF_Snow__sleet___-SNAPSHOT"
   }
 
   def "Get most recent tag with no tags"() {
