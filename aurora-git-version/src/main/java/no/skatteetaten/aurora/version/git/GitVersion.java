@@ -142,7 +142,7 @@ public class GitVersion {
         String versionSafeName = versionName
             .replaceAll("[\\/-]", "_")
             .replaceAll("[\\/,]", "_");
-        
+
         versionSafeName = versionSafeName.substring(0, startIndex);
 
         String version = String.format("%s%s", versionSafeName, postfix);
