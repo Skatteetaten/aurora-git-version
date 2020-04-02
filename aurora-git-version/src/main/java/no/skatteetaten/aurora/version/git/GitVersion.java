@@ -139,7 +139,10 @@ public class GitVersion {
         int versionNameMaxLength = options.getVersionMaxLength() - (postfix == null ? 0 : postfix.length());
         int startIndex = Math.min(versionName.length(), versionNameMaxLength);
 
-        String versionSafeName = versionName.replaceAll("[\\/-]", "_");
+        String versionSafeName = versionName
+            .replaceAll("[\\/-]", "_")
+            .replaceAll("[\\/,]", "_");
+        
         versionSafeName = versionSafeName.substring(0, startIndex);
 
         String version = String.format("%s%s", versionSafeName, postfix);
