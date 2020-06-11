@@ -15,10 +15,10 @@ public final class GitLogParser {
     }
 
     static final Pattern BITBUCKET_MERGE_FROM_PULL_REQUEST = buildMultilinePattern(
-        "Merge pull request #\\d+ in .*? from \\S+?\\/\\S+?:(?<branch>\\S+) to \\S+");
+        "Pull request #\\d+: \\S+[\\s\\r\\n]+Merge in .*? from \\S+?\\/\\S+?:(?<branch>\\S+) to \\S+");
 
     static final Pattern BITBUCKET_MERGE_NODE = buildMultilinePattern(
-        "Merge pull request #\\d+ in .*? from (?<branch>\\S+) to \\S+");
+        "Pull request #\\d+: \\S+[\\s\\r\\n]+Merge in .*? from (?<branch>\\S+) to \\S+");
 
     static final Pattern GIT_MERGE = buildMultilinePattern(
         "Merge branch '(?<branch>\\S+)'");
@@ -42,7 +42,7 @@ public final class GitLogParser {
             return Optional.empty();
         }
         return PATTERNS.stream()
-            .map(pattern -> pattern.matcher(commitLogEntry.get().getShortMessage()))
+            .map(pattern -> pattern.matcher(commitLogEntry.get().getFullMessage()))
             .map(GitLogParser::fetchBranchGroupFromFirstMatch)
             .flatMap(GitLogParser::optionalToStream)
             .findFirst();
