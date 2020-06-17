@@ -9,9 +9,17 @@ class GitLogParserTest extends Specification {
 
   def commitLogTestEntries = [
       "BitBucket merge commit":
-          "Merge pull request #416 in PROJ/repo from feature/PROJ_192-branch-name to master",
+          """
+          |Pull request #416: Feature/PROJ_192-branch-name
+          |    
+          |Merge in PROJ/repo from feature/PROJ_192-branch-name to master
+          """.stripMargin().trim(),
       "BitBucket merge from fork":
-          "Merge pull request #3 in PROJ/repo from user/repo:bugfix/my-local-branch to master",
+          """
+          |Pull request #3: Bugfix/my-local-branch
+          |    
+          |Merge in PROJ/repo from user/repo:bugfix/my-local-branch to master
+          """.stripMargin().trim(),
       "Standard Git merge message":
           "Merge branch 'feature/PROJ-123-feature'",
       "Squash merge message":
