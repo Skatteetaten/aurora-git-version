@@ -15,10 +15,10 @@ public final class GitLogParser {
     }
 
     static final Pattern BITBUCKET_MERGE_FROM_PULL_REQUEST = buildMultilinePattern(
-        "Pull request #\\d+: \\S+[\\s\\r\\n]+Merge in .*? from \\S+?\\/\\S+?:(?<branch>\\S+) to \\S+");
+        "Pull request #\\d+: .+[\\s\\r\\n]+Merge in .*? from \\S+?\\/\\S+?:(?<branch>\\S+) to \\S+");
 
     static final Pattern BITBUCKET_MERGE_NODE = buildMultilinePattern(
-        "Pull request #\\d+: \\S+[\\s\\r\\n]+Merge in .*? from (?<branch>\\S+) to \\S+");
+        "Pull request #\\d+: .+[\\s\\r\\n]+Merge in .*? from (?<branch>\\S+) to \\S+");
 
     static final Pattern GIT_MERGE = buildMultilinePattern(
         "Merge branch '(?<branch>\\S+)'");

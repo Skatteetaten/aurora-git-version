@@ -10,13 +10,13 @@ class GitLogParserTest extends Specification {
   def commitLogTestEntries = [
       "BitBucket merge commit":
           """
-          |Pull request #416: Feature/PROJ_192-branch-name
+          |Pull request #416: Feature/PROJ_192-branch-name message including spaces
           |    
           |Merge in PROJ/repo from feature/PROJ_192-branch-name to master
           """.stripMargin().trim(),
       "BitBucket merge from fork":
           """
-          |Pull request #3: Bugfix/my-local-branch
+          |Pull request #3: Bugfix/my-local-branch message including spaces
           |    
           |Merge in PROJ/repo from user/repo:bugfix/my-local-branch to master
           """.stripMargin().trim(),
