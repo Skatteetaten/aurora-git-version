@@ -7,6 +7,8 @@ def overrides = [
     checkstyle : false,
     sonarQube: false,
     iqOrganizationName: "Team AOS",
+    iqBreakOnUnstable: true,
+    openShiftBuild: false,
     groupId: "no.skatteetaten.aurora",
     artifactId: "aurora-git-version-parent",
     deployTo: 'maven-central',
