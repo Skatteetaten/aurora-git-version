@@ -73,7 +73,7 @@ public final class Main {
         suggesterOptions.setTryDeterminingCurrentVersionFromTagName(!incrementForExistingTag.isPresent());
         suggesterOptions.setForceSegmentIncrementForExistingTag(incrementForExistingTag);
         suggesterOptions.setTryDeterminingCurrentVersionFromTagName(
-        !(incrementForExistingTag.isPresent() || cmd.hasOption("no-tag-for-snapshot"))
+            !(incrementForExistingTag.isPresent() || cmd.hasOption("no-tag-for-snapshot"))
         );
         suggesterOptions.setForceSegmentIncrementForExistingTag(incrementForExistingTag);
 
