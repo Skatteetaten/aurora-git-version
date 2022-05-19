@@ -70,8 +70,6 @@ public final class Main {
         suggesterOptions.setVersionHint(versionHint);
         suggesterOptions.setMetadata(metadata);
         suggesterOptions.setForceMinorIncrementForBranchPrefixes(forceMinorPrefixes);
-        suggesterOptions.setTryDeterminingCurrentVersionFromTagName(!incrementForExistingTag.isPresent());
-        suggesterOptions.setForceSegmentIncrementForExistingTag(incrementForExistingTag);
         suggesterOptions.setTryDeterminingCurrentVersionFromTagName(
             !(incrementForExistingTag.isPresent() || cmd.hasOption("no-tag-for-snapshot"))
         );
