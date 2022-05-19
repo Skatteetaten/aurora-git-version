@@ -8,6 +8,7 @@ def overrides = [
     sonarQube: false,
     iqOrganizationName: "Team AOS",
     iqBreakOnUnstable: true,
+    iqEmbedded: true,
     openShiftBuild: false,
     groupId: "no.skatteetaten.aurora",
     artifactId: "aurora-git-version-parent",
