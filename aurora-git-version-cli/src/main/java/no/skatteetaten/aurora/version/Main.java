@@ -70,7 +70,9 @@ public final class Main {
         suggesterOptions.setVersionHint(versionHint);
         suggesterOptions.setMetadata(metadata);
         suggesterOptions.setForceMinorIncrementForBranchPrefixes(forceMinorPrefixes);
-        suggesterOptions.setTryDeterminingCurrentVersionFromTagName(!incrementForExistingTag.isPresent());
+        suggesterOptions.setTryDeterminingCurrentVersionFromTagName(
+            !(incrementForExistingTag.isPresent() || cmd.hasOption("no-tag-for-snapshot"))
+        );
         suggesterOptions.setForceSegmentIncrementForExistingTag(incrementForExistingTag);
 
         return suggesterOptions;
@@ -106,6 +108,10 @@ public final class Main {
         options.addOption(Option.builder().longOpt("metadata")
             .desc("metadata to add to the generated version")
             .hasArg()
+            .build());
+
+        options.addOption(Option.builder().longOpt("no-tag-for-snapshot")
+            .desc("Skip fetching tag for snapshot")
             .build());
         return options;
     }
