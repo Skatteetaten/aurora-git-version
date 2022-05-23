@@ -13,6 +13,7 @@ def overrides = [
     groupId: "no.skatteetaten.aurora",
     artifactId: "aurora-git-version-parent",
     deployTo: 'maven-central',
+    uploadLeveransepakke: false,
     jiraFiksetIKomponentversjon: true,
     chatRoom: "#aos-notifications",
     versionStrategy: [
