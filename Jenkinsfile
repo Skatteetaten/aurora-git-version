@@ -1,7 +1,7 @@
 def jenkinsfile
 
 def overrides = [
-    scriptVersion  : 'v7',
+    scriptVersion  : 'bugfix/disable-internal-upload-for-maven-central-multi-module',
     pipelineScript: 'https://git.aurora.skead.no/scm/ao/aurora-pipeline-scripts.git',
     credentialsId: "github",
     checkstyle : false,
