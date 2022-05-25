@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.4.1] - 2022-05-25
 ### Fixed
-- Fixed tests not running by adding maven-surefire-plugin and maven-failsafe-plugin.
+- Fixed tests that were not running by adding maven-surefire-plugin and maven-failsafe-plugin.
 
 ## [3.4.0] - 2022-05-22
 ### Added
